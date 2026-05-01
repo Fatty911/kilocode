@@ -16,7 +16,7 @@ import type { EditorContext, IndexingStatus } from "./services/cli-backend/types
 import { FileIgnoreController } from "./services/autocomplete/shims/FileIgnoreController"
 import { ChatTextAreaAutocomplete } from "./services/autocomplete/chat-autocomplete/ChatTextAreaAutocomplete"
 import { buildWebviewHtml } from "./utils"
-import { TelemetryProxy, type TelemetryPropertiesProvider } from "./services/telemetry"
+import { TelemetryProxy, type TelemetryPropertiesProvider, pushTelemetryState } from "./services/telemetry"
 import {
   sessionToWebview,
   indexProvidersById,
@@ -346,10 +346,8 @@ export class KiloProvider implements vscode.WebviewViewProvider, TelemetryProper
     }
 
     // Always push connection state first so the UI can render appropriately.
-    this.postMessage({
-      type: "connectionState",
-      state: this.connectionState,
-    })
+    this.postMessage({ type: "connectionState", state: this.connectionState })
+    pushTelemetryState((m) => this.postMessage(m))
 
     // Re-send ready so the webview can recover after refresh.
     if (serverInfo) {

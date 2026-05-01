@@ -125,6 +125,12 @@ function DiagnosticsDisplay(props: { diagnostics: Diagnostic[] }): JSX.Element {
   )
 }
 
+export interface MessageFeedbackControls {
+  enabled?: boolean
+  rating?: "up" | "down"
+  onRate?: (rating: "up" | "down" | null) => void
+}
+
 export interface MessagePartProps {
   part: PartType
   message: MessageType
@@ -136,6 +142,7 @@ export interface MessagePartProps {
   turnDiffSummary?: () => JSX.Element
   animate?: boolean
   working?: boolean
+  feedback?: MessageFeedbackControls
 }
 
 export type PartComponent = Component<MessagePartProps>
@@ -971,6 +978,7 @@ export function Part(props: MessagePartProps) {
         turnDiffSummary={props.turnDiffSummary}
         animate={props.animate}
         working={props.working}
+        feedback={props.feedback}
       />
     </Show>
   )
@@ -1325,6 +1333,52 @@ PART_MAPPING["text"] = function TextPartDisplay(props) {
                 aria-label={copied() ? i18n.t("ui.message.copied") : i18n.t("ui.message.copyResponse")}
               />
             </Tooltip>
+            <Show when={props.feedback?.enabled}>
+              <Tooltip
+                value={
+                  props.feedback?.rating === "up"
+                    ? i18n.t("ui.message.feedback.clearRating")
+                    : i18n.t("ui.message.feedback.helpful")
+                }
+                placement="top"
+                gutter={4}
+              >
+                <IconButton
+                  icon={props.feedback?.rating === "up" ? "thumbs-up-filled" : "thumbs-up"}
+                  size="normal"
+                  variant="ghost"
+                  onMouseDown={(e) => e.preventDefault()}
+                  onClick={() => {
+                    const next = props.feedback?.rating === "up" ? null : "up"
+                    props.feedback?.onRate?.(next)
+                  }}
+                  aria-pressed={props.feedback?.rating === "up"}
+                  aria-label={i18n.t("ui.message.feedback.helpful")}
+                />
+              </Tooltip>
+              <Tooltip
+                value={
+                  props.feedback?.rating === "down"
+                    ? i18n.t("ui.message.feedback.clearRating")
+                    : i18n.t("ui.message.feedback.notHelpful")
+                }
+                placement="top"
+                gutter={4}
+              >
+                <IconButton
+                  icon={props.feedback?.rating === "down" ? "thumbs-down-filled" : "thumbs-down"}
+                  size="normal"
+                  variant="ghost"
+                  onMouseDown={(e) => e.preventDefault()}
+                  onClick={() => {
+                    const next = props.feedback?.rating === "down" ? null : "down"
+                    props.feedback?.onRate?.(next)
+                  }}
+                  aria-pressed={props.feedback?.rating === "down"}
+                  aria-label={i18n.t("ui.message.feedback.notHelpful")}
+                />
+              </Tooltip>
+            </Show>
           </div>
         </Show>
         <Show when={summary()}>
