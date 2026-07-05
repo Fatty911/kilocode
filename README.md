@@ -175,3 +175,7 @@ Kilo CLI is a fork of [OpenCode](https://github.com/anomalyco/opencode), enhance
 ---
 
 **Join the community** [Discord](https://kilo.ai/discord) | [X](https://x.com/kilocode) | [Reddit](https://www.reddit.com/r/kilocode/)
+
+### 2026-07-05
+- 仓库重命名：`kilocode-chunk-idle-timeout` → `kilocode`（与上游 Kilo-Org/kilocode 名称一致）
+- 新增上游同步工作流 `sync-upstream.yml`
