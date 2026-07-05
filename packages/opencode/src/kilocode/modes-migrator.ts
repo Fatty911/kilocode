@@ -2,8 +2,9 @@ import matter from "gray-matter"
 import * as fs from "fs/promises"
 import * as path from "path"
 import os from "os"
-import { Config } from "../config"
-import { ConfigAgent, ConfigPermission } from "../config"
+import { Config } from "../config/config"
+import { ConfigAgent } from "../config/agent"
+import { ConfigPermission } from "../config/permission"
 import { KilocodePaths } from "./paths"
 import type { OrganizationMode } from "@kilocode/kilo-gateway"
 
@@ -110,7 +111,9 @@ export namespace ModesMigrator {
       description: cfg.description ?? cfg.whenToUse ?? mode.name,
       prompt: prompt || undefined,
       permission: convertPermissions(groups),
-      options: { source: "organization", displayName: mode.name },
+      // Typed metadata fields — must NOT live in `options`, which is forwarded to the provider.
+      displayName: mode.name,
+      source: "organization",
     }
   }
 

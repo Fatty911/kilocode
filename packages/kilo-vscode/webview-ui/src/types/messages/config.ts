@@ -29,6 +29,7 @@ export interface SkillsConfig {
 
 export interface CompactionConfig {
   auto?: boolean
+  threshold_percent?: number | null
   prune?: boolean
 }
 
@@ -37,14 +38,16 @@ export interface WatcherConfig {
 }
 
 export interface ExperimentalConfig {
-  disable_paste_summary?: boolean
   batch_tool?: boolean
-  semantic_indexing?: boolean
   codebase_search?: boolean
-  agent_manager_tool?: boolean
+  agent_requirements?: boolean
+  native_notebook_tools?: boolean
+  speech_to_text_model?: string
   primary_tools?: string[]
   continue_loop_on_deny?: boolean
   mcp_timeout?: number
+  sandbox?: boolean
+  sandbox_restrict_network?: boolean
 }
 
 export interface CommitMessageConfig {
@@ -52,6 +55,7 @@ export interface CommitMessageConfig {
 }
 
 export type IndexingProvider =
+  | "kilo"
   | "openai"
   | "ollama"
   | "openai-compatible"
@@ -65,9 +69,10 @@ export type IndexingProvider =
 export interface IndexingConfig {
   enabled?: boolean
   provider?: IndexingProvider
-  model?: string
-  dimension?: number
+  model?: string | null
+  dimension?: number | null
   vectorStore?: "lancedb" | "qdrant"
+  kilo?: { apiKey?: string; baseUrl?: string; organizationId?: string }
   openai?: { apiKey?: string }
   ollama?: { baseUrl?: string }
   "openai-compatible"?: { baseUrl?: string; apiKey?: string }
@@ -85,6 +90,20 @@ export interface IndexingConfig {
   scannerMaxBatchRetries?: number
 }
 
+export type KiloEmbeddingModel = {
+  id: string
+  name: string
+  dimension: number
+  scoreThreshold: number
+  note?: string
+}
+
+export type KiloEmbeddingModelCatalog = {
+  defaultModel: string
+  models: KiloEmbeddingModel[]
+  aliases: Record<string, string>
+}
+
 export type IndexingStatus = SdkIndexingStatus
 
 export interface BrowserSettings {
@@ -94,12 +113,16 @@ export interface BrowserSettings {
 }
 
 export type TerminalCommandDisplay = "expanded" | "collapsed"
+export type CodeEditDisplay = "expanded" | "collapsed"
 
 export interface Config {
   permission?: PermissionConfig
   model?: string | null
   small_model?: string | null
-  default_agent?: string
+  subagent_model?: string | null
+  subagent_variant?: string | null
+  subagent_variant_overrides?: Record<string, string | null> | null
+  default_agent?: string | null
   agent?: Record<string, AgentConfig>
   provider?: Record<string, ProviderConfig>
   disabled_providers?: string[]
@@ -111,6 +134,8 @@ export interface Config {
   snapshot?: boolean
   remote_control?: boolean
   terminal_command_display?: TerminalCommandDisplay
+  code_edit_display?: CodeEditDisplay
+  hide_prompt_training_models?: boolean
   share?: "manual" | "auto" | "disabled"
   username?: string
   watcher?: WatcherConfig
@@ -119,7 +144,6 @@ export interface Config {
   compaction?: CompactionConfig
   commit_message?: CommitMessageConfig
   tools?: Record<string, boolean>
-  layout?: "auto" | "stretch"
   auto_collapse_reasoning?: boolean
   experimental?: ExperimentalConfig
   indexing?: IndexingConfig
@@ -127,4 +151,5 @@ export interface Config {
 
 export interface FeatureFlags {
   indexing: boolean
+  sandboxControls: boolean
 }

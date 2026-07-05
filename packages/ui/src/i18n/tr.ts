@@ -58,6 +58,15 @@ export const dict = {
   "ui.sessionTurn.error.freeUsageExceeded": "Ücretsiz kullanım aşıldı",
   "ui.sessionTurn.error.addCredits": "Kredi ekle",
 
+  "dialog.usageExceeded.freeTier.title": "Ücretsiz sınıra ulaşıldı",
+  "dialog.usageExceeded.freeTier.description":
+    "En iyi açık kaynak modellere güvenilir erişim için Kilo Go'ya abone olun. Aylık $5'tan başlar.",
+  "dialog.usageExceeded.freeTier.actionLabel": "Abone ol",
+  "dialog.usageExceeded.accountRateLimit.title": "Go sınırına ulaşıldı",
+  "dialog.usageExceeded.accountRateLimit.description":
+    "Kullanım sınırına ulaşıldı. Bu modeli şimdi kullanmaya devam etmek için mevcut bakiyenizden kullanımı etkinleştirin",
+  "dialog.usageExceeded.accountRateLimit.actionLabel": "Ayarları aç",
+
   "ui.sessionTurn.status.delegating": "Görev devrediliyor",
   "ui.sessionTurn.status.delegatingWaitingPermission": "Subagent waiting for permission",
   "ui.sessionTurn.status.delegatingWaitingQuestion": "Subagent waiting for response",
@@ -102,6 +111,18 @@ export const dict = {
   "ui.textField.copied": "Kopyalandı",
 
   "ui.imagePreview.alt": "Görsel önizleme",
+  // kilocode_change start
+  "ui.mermaid.rendering": "Mermaid diyagramı işleniyor...",
+  "ui.mermaid.renderError": "Mermaid işleme başarısız: {{message}}",
+  "ui.mermaid.errorDefault": "Mermaid diyagramı işlenemiyor.",
+  "ui.mermaid.errorEmpty": "Mermaid boş bir diyagram işledi.",
+  "ui.mermaid.download": "İndir",
+  "ui.mermaid.copySource": "Mermaid kaynağını kopyala",
+  "ui.mermaid.copySvg": "SVG kopyala",
+  "ui.mermaid.copyPng": "PNG kopyala",
+  "ui.mermaid.downloadSvg": "SVG indir",
+  "ui.mermaid.downloadPng": "PNG indir",
+  // kilocode_change end
   "ui.scrollView.ariaLabel": "kaydırılabilir içerik",
 
   "ui.tool.read": "Oku",
@@ -111,7 +132,6 @@ export const dict = {
   "ui.tool.grep": "Grep",
   "ui.tool.webfetch": "Web getir",
   "ui.tool.websearch": "Web Araması",
-  "ui.tool.codesearch": "Kod Araması",
   "ui.tool.shell": "Kabuk",
   "ui.tool.patch": "Yama",
   "ui.tool.todos": "Görevler",

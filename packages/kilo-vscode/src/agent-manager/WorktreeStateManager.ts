@@ -32,9 +32,12 @@ export interface Worktree {
   prUrl?: string
   /** Cached PR state for correct badge color on reload (open/merged/closed/draft). */
   prState?: string
-  /** Original branch created with the worktree, used for cleanup on deletion.
-   *  Set automatically when `branch` is updated via live sync. */
+  /** Original branch created with the worktree, used for cleanup after a manual branch change. */
   originalBranch?: string
+  /** Whether Agent Manager created and may safely clean up this branch. Undefined preserves legacy behavior. */
+  branchOwned?: boolean
+  /** Initial session whose prompts may name this placeholder branch once. */
+  autoNameSessionId?: string
   /** Section this worktree belongs to, or undefined for ungrouped. */
   sectionId?: string
 }
@@ -44,7 +47,7 @@ export interface Section {
   name: string
   /** Color label (e.g. "Red", "Blue") mapped to VS Code theme CSS vars at render time, or null for default. */
   color: string | null
-  /** Position among top-level sidebar children (sections and ungrouped worktrees). */
+  /** Position among sections. Ungrouped worktrees are always rendered above sections. */
   order: number
   collapsed: boolean
 }
@@ -71,8 +74,15 @@ interface StateFile {
   tabOrder?: Record<string, string[]>
   worktreeOrder?: string[]
   sessionsCollapsed?: boolean
+  sidebarCollapsed?: boolean
   reviewDiffStyle?: "unified" | "split"
   defaultBaseBranch?: string
+}
+
+export type StateLoadStatus = "loaded" | "missing" | "failed"
+
+export interface StateLoadResult extends MigrationResult {
+  status: StateLoadStatus
 }
 
 import { KILO_DIR, migrateAgentManagerData, type MigrationResult } from "./constants"
@@ -92,12 +102,14 @@ export class WorktreeStateManager {
   private sections = new Map<string, Section>()
   private tabOrder: Record<string, string[]> = {}
   private worktreeOrder: string[] = []
-  private collapsed = false
+  private collapsed = true
+  private sidebar = false
   private reviewDiffStyle: "unified" | "split" = "unified"
   private defaultBase: string | undefined
   private readonly log: (msg: string) => void
   private saving: Promise<void> | undefined
-  private pendingSave = false
+  private dirty = false
+  private failed = false
 
   private readonly root: string
   private migrated = false
@@ -167,6 +179,7 @@ export class WorktreeStateManager {
     remote?: string
     groupId?: string
     label?: string
+    branchOwned?: boolean
   }): Worktree {
     const id = generateId("wt")
     const wt: Worktree = {
@@ -179,6 +192,7 @@ export class WorktreeStateManager {
     if (params.remote) wt.remote = params.remote
     if (params.groupId) wt.groupId = params.groupId
     if (params.label) wt.label = params.label
+    if (params.branchOwned !== undefined) wt.branchOwned = params.branchOwned
     this.worktrees.set(id, wt)
     this.setNormalizedWorktreeOrder(this.worktreeOrder)
     this.log(
@@ -188,12 +202,63 @@ export class WorktreeStateManager {
     return wt
   }
 
+  restoreWorktree(params: {
+    branch: string
+    path: string
+    parentBranch: string
+    remote?: string
+    createdAt: string
+  }): Worktree {
+    const existing = this.findWorktreeByPath(params.path)
+    if (existing) return existing
+    const id = generateId("wt")
+    const wt: Worktree = {
+      id,
+      branch: params.branch,
+      path: params.path,
+      parentBranch: params.parentBranch,
+      createdAt: params.createdAt,
+    }
+    if (params.remote) wt.remote = params.remote
+    this.worktrees.set(id, wt)
+    this.setNormalizedWorktreeOrder(this.worktreeOrder)
+    this.log(`Restored worktree ${id}: ${params.branch} (${params.path})`)
+    void this.save()
+    return wt
+  }
+
   updateWorktreeBranch(id: string, branch: string): boolean {
     const wt = this.worktrees.get(id)
     if (!wt || wt.branch === branch) return false
-    if (!wt.originalBranch) wt.originalBranch = wt.branch
+    if (!wt.originalBranch && wt.branchOwned !== false) wt.originalBranch = wt.branch
     this.log(`Updated worktree ${id} branch: ${wt.branch} → ${branch}`)
     wt.branch = branch
+    wt.autoNameSessionId = undefined
+    void this.save()
+    return true
+  }
+
+  armAutoName(id: string, sessionId: string): void {
+    const wt = this.worktrees.get(id)
+    if (!wt || wt.branchOwned !== true) return
+    wt.autoNameSessionId = sessionId
+    void this.save()
+  }
+
+  clearAutoName(id: string): void {
+    const wt = this.worktrees.get(id)
+    if (!wt?.autoNameSessionId) return
+    wt.autoNameSessionId = undefined
+    void this.save()
+  }
+
+  renameOwnedBranch(id: string, current: string, branch: string): boolean {
+    const wt = this.worktrees.get(id)
+    if (!wt || wt.branch !== current || wt.branchOwned !== true) return false
+    wt.branch = branch
+    wt.originalBranch = undefined
+    wt.autoNameSessionId = undefined
+    this.log(`Automatically renamed worktree ${id} branch: ${current} → ${branch}`)
     void this.save()
     return true
   }
@@ -242,6 +307,10 @@ export class WorktreeStateManager {
   addSession(sessionId: string, worktreeId: string | null): ManagedSession {
     const session: ManagedSession = { id: sessionId, worktreeId, createdAt: new Date().toISOString() }
     this.sessions.set(sessionId, session)
+    const worktree = worktreeId ? this.worktrees.get(worktreeId) : undefined
+    if (worktree?.autoNameSessionId && worktreeId && this.getSessions(worktreeId).length > 1) {
+      worktree.autoNameSessionId = undefined
+    }
     this.log(`Added session ${sessionId} to worktree ${worktreeId ?? "local"}`)
     void this.save()
     return session
@@ -251,7 +320,11 @@ export class WorktreeStateManager {
   moveSession(sessionId: string, worktreeId: string | null): void {
     const session = this.sessions.get(sessionId)
     if (!session) return
+    const previous = session.worktreeId ? this.worktrees.get(session.worktreeId) : undefined
+    if (previous?.autoNameSessionId === sessionId) previous.autoNameSessionId = undefined
     session.worktreeId = worktreeId
+    const worktree = worktreeId ? this.worktrees.get(worktreeId) : undefined
+    if (worktree?.autoNameSessionId) worktree.autoNameSessionId = undefined
     this.log(`Moved session ${sessionId} to ${worktreeId ?? "local"}`)
     void this.save()
   }
@@ -302,6 +375,14 @@ export class WorktreeStateManager {
     void this.save()
   }
 
+  private ordered(order: string[]): string[] {
+    const idx = new Map(order.map((id, i) => [id, i] as const))
+    return [...this.worktrees.values()]
+      .filter((wt) => !wt.sectionId)
+      .sort((a, b) => (idx.get(a.id) ?? Number.MAX_SAFE_INTEGER) - (idx.get(b.id) ?? Number.MAX_SAFE_INTEGER))
+      .map((wt) => wt.id)
+  }
+
   private setNormalizedWorktreeOrder(order: string[]): boolean {
     const valid = new Set<string>()
     for (const sec of this.sections.values()) valid.add(sec.id)
@@ -319,17 +400,22 @@ export class WorktreeStateManager {
     for (const sec of [...this.sections.values()].sort((a, b) => a.order - b.order)) add(sec.id)
     for (const wt of this.worktrees.values()) add(wt.id)
 
+    const normalized = [
+      ...this.ordered(result),
+      ...result.filter((id) => this.sections.has(id)),
+      ...result.filter((id) => this.worktrees.get(id)?.sectionId),
+    ]
+
     const changed =
-      result.length !== this.worktreeOrder.length || result.some((id, idx) => id !== this.worktreeOrder[idx])
-    this.worktreeOrder = result
+      normalized.length !== this.worktreeOrder.length || normalized.some((id, idx) => id !== this.worktreeOrder[idx])
+    this.worktreeOrder = normalized
     return this.syncSectionOrder() || changed
   }
 
   private syncSectionOrder(): boolean {
     const top = this.worktreeOrder.filter((id) => {
       if (this.sections.has(id)) return true
-      const wt = this.worktrees.get(id)
-      return !!wt && !wt.sectionId
+      return false
     })
     const index = new Map(top.map((id, idx) => [id, idx] as const))
     const changes = [...this.sections.values()].map((sec) => {
@@ -478,6 +564,19 @@ export class WorktreeStateManager {
   }
 
   // ---------------------------------------------------------------------------
+  // Sidebar collapsed
+  // ---------------------------------------------------------------------------
+
+  getSidebarCollapsed(): boolean {
+    return this.sidebar
+  }
+
+  setSidebarCollapsed(value: boolean): void {
+    this.sidebar = value
+    void this.save()
+  }
+
+  // ---------------------------------------------------------------------------
   // Review diff style
   // ---------------------------------------------------------------------------
 
@@ -507,7 +606,7 @@ export class WorktreeStateManager {
   // Persistence
   // ---------------------------------------------------------------------------
 
-  async load(): Promise<MigrationResult> {
+  async load(): Promise<StateLoadResult> {
     // Migrate Agent Manager data from .kilocode → .kilo before first read
     let migration: MigrationResult = { refsFixed: 0 }
     if (!this.migrated) {
@@ -518,15 +617,34 @@ export class WorktreeStateManager {
       const content = await fs.promises.readFile(this.file, "utf-8")
       this.apply(content)
       this.loadFailed = false
+      return { ...migration, status: "loaded" }
     } catch (error) {
       const code = (error as NodeJS.ErrnoException).code
-      if (code === "ENOENT") this.loadFailed = false
+      if (code === "ENOENT") {
+        this.loadFailed = false
+        return { ...migration, status: "missing" }
+      }
       if (code !== "ENOENT") {
         this.log(`Failed to load state: ${error}`)
         this.loadFailed = true
       }
     }
-    return migration
+    return { ...migration, status: "failed" }
+  }
+
+  async prepareRecovery(): Promise<boolean> {
+    if (!this.loadFailed) return true
+    const stamp = new Date().toISOString().replace(/[:.]/g, "-")
+    const backup = `${this.file}.corrupt-${stamp}`
+    try {
+      await fs.promises.rename(this.file, backup)
+      this.loadFailed = false
+      this.log(`Backed up unreadable state to ${backup}`)
+      return true
+    } catch (error) {
+      this.log(`Failed to back up unreadable state: ${error}`)
+      return false
+    }
   }
 
   private apply(content: string): void {
@@ -549,8 +667,9 @@ export class WorktreeStateManager {
     let pruned = 0
     for (const [id, s] of Object.entries(data.sessions ?? {})) {
       const ref = s.worktreeId
+      const session: ManagedSession = { id, worktreeId: s.worktreeId, createdAt: s.createdAt }
       if (ref === null) {
-        this.sessions.set(id, { id, ...s })
+        this.sessions.set(id, session)
         continue
       }
       // Skip orphaned sessions referencing a deleted worktree.
@@ -558,7 +677,7 @@ export class WorktreeStateManager {
         pruned++
         continue
       }
-      this.sessions.set(id, { id, ...s })
+      this.sessions.set(id, session)
     }
     for (const [id, sec] of Object.entries(data.sections ?? {})) {
       this.sections.set(id, { id, ...sec })
@@ -570,7 +689,9 @@ export class WorktreeStateManager {
       this.worktreeOrder = data.worktreeOrder
     }
     const repaired = this.setNormalizedWorktreeOrder(this.worktreeOrder)
+    // State files from before this preference was explicit used the expanded layout.
     this.collapsed = data.sessionsCollapsed ?? false
+    this.sidebar = data.sidebarCollapsed ?? false
     if (data.reviewDiffStyle === "split") {
       this.reviewDiffStyle = "split"
     }
@@ -610,7 +731,9 @@ export class WorktreeStateManager {
 
   /** Wait for any in-flight save to complete without triggering a new one. */
   async flush(): Promise<void> {
-    if (this.saving) await this.saving
+    const active = this.saving
+    if (active) await active
+    if (this.dirty) await this.save()
   }
 
   async save(): Promise<void> {
@@ -619,27 +742,32 @@ export class WorktreeStateManager {
       return
     }
 
-    // Serialize concurrent saves — if a save is in-flight, queue one follow-up
-    if (this.saving) {
-      this.pendingSave = true
-      await this.saving
-      // The in-flight save finished but our data may not have been written yet.
-      // If there's a new save already running (the pendingSave follow-up), wait for it.
-      if (this.saving) await this.saving
-      return
+    this.dirty = true
+    this.failed = false
+    while (this.dirty && !this.failed) {
+      await (this.saving ?? this.startSave())
     }
+  }
 
-    this.saving = this.writeToDisk()
-    try {
-      await this.saving
-    } finally {
-      this.saving = undefined
-    }
+  private startSave(): Promise<void> {
+    const run = this.drain().finally(() => {
+      if (this.saving === run) this.saving = undefined
+    })
+    this.saving = run
+    return run
+  }
 
-    // If another save was requested while we were writing, flush it now
-    if (this.pendingSave) {
-      this.pendingSave = false
-      await this.save()
+  private async drain(): Promise<void> {
+    while (this.dirty) {
+      this.dirty = false
+      try {
+        await this.writeToDisk()
+      } catch (error) {
+        this.dirty = true
+        this.failed = true
+        this.log(`Failed to save state: ${error}`)
+        return
+      }
     }
   }
 
@@ -666,8 +794,9 @@ export class WorktreeStateManager {
     if (this.worktreeOrder.length > 0) {
       data.worktreeOrder = this.worktreeOrder
     }
-    if (this.collapsed) {
-      data.sessionsCollapsed = true
+    data.sessionsCollapsed = this.collapsed
+    if (this.sidebar) {
+      data.sidebarCollapsed = true
     }
     if (this.reviewDiffStyle === "split") {
       data.reviewDiffStyle = "split"

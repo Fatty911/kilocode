@@ -1,27 +1,27 @@
-import os from "os"
 import path from "path"
 import { pathToFileURL } from "url"
-import z from "zod"
-import { Effect, Layer, Context } from "effect"
-import { NamedError } from "@opencode-ai/shared/util/error"
+import { Effect, Layer, Context, Schema } from "effect"
+import { NamedError } from "@opencode-ai/core/util/error"
 import type { Agent } from "@/agent/agent"
 import { Bus } from "@/bus"
-import { makeRuntime } from "@/effect/run-service" // kilocode_change
-import { InstanceState } from "@/effect"
-import { Flag } from "@/flag/flag"
-import { Global } from "@/global"
+import { InstanceState } from "@/effect/instance-state"
+import { Global } from "@opencode-ai/core/global"
 import { Permission } from "@/permission"
-import { AppFileSystem } from "@opencode-ai/shared/filesystem"
-import { Config } from "../config"
-import { ConfigMarkdown } from "../config"
-import { Glob } from "@opencode-ai/shared/util/glob"
-import { Log } from "../util"
+import { AppFileSystem } from "@opencode-ai/core/filesystem"
+import { Config } from "@/config/config"
+import { ConfigMarkdown } from "@/config/markdown"
+import { RuntimeFlags } from "@/effect/runtime-flags"
+import { Glob } from "@opencode-ai/core/util/glob"
+import * as Log from "@opencode-ai/core/util/log"
 import { Discovery } from "./discovery"
-import { rm } from "fs/promises" // kilocode_change
 import { BUILTIN_SKILLS } from "../kilocode/skills/builtin" // kilocode_change
+import { primaryPaths } from "../kilocode/primary-worktree" // kilocode_change
+import { Git } from "@/git" // kilocode_change
+import { isRecord } from "@/util/record"
 
 const log = Log.create({ service: "skill" })
-const EXTERNAL_DIRS = [".claude", ".agents"]
+const CLAUDE_EXTERNAL_DIR = ".claude"
+const AGENTS_EXTERNAL_DIR = ".agents"
 // kilocode_change start
 export const BUILTIN_LOCATION = "builtin"
 // kilocode_change end
@@ -29,31 +29,50 @@ const EXTERNAL_SKILL_PATTERN = "skills/**/SKILL.md"
 const KILO_SKILL_PATTERN = "{skill,skills}/**/SKILL.md"
 const SKILL_PATTERN = "**/SKILL.md"
 
-export const Info = z.object({
-  name: z.string(),
-  description: z.string(),
-  location: z.string(),
-  content: z.string(),
+export const Info = Schema.Struct({
+  name: Schema.String,
+  description: Schema.optional(Schema.String),
+  location: Schema.String,
+  content: Schema.String,
 })
-export type Info = z.infer<typeof Info>
+export type Info = Schema.Schema.Type<typeof Info>
 
-export const InvalidError = NamedError.create(
-  "SkillInvalidError",
-  z.object({
-    path: z.string(),
-    message: z.string().optional(),
-    issues: z.custom<z.core.$ZodIssue[]>().optional(),
+const Issue = Schema.StructWithRest(
+  Schema.Struct({
+    message: Schema.String,
+    path: Schema.Array(Schema.String),
   }),
+  [Schema.Record(Schema.String, Schema.Unknown)],
 )
 
-export const NameMismatchError = NamedError.create(
-  "SkillNameMismatchError",
-  z.object({
-    path: z.string(),
-    expected: z.string(),
-    actual: z.string(),
-  }),
-)
+function isSkillFrontmatter(data: unknown): data is { name: string; description?: string } {
+  return (
+    isRecord(data) &&
+    typeof data.name === "string" &&
+    (data.description === undefined || typeof data.description === "string")
+  )
+}
+
+export class InvalidError extends Schema.TaggedErrorClass<InvalidError>()("SkillInvalidError", {
+  path: Schema.String,
+  message: Schema.optional(Schema.String),
+  issues: Schema.optional(Schema.Array(Issue)),
+}) {}
+
+export class NameMismatchError extends Schema.TaggedErrorClass<NameMismatchError>()("SkillNameMismatchError", {
+  path: Schema.String,
+  expected: Schema.String,
+  actual: Schema.String,
+}) {}
+
+export class NotFoundError extends Schema.TaggedErrorClass<NotFoundError>()("Skill.NotFoundError", {
+  name: Schema.String,
+  available: Schema.Array(Schema.String),
+}) {
+  override get message() {
+    return `Skill "${this.name}" not found. Available skills: ${this.available.join(", ") || "none"}`
+  }
+}
 
 type State = {
   skills: Record<string, Info>
@@ -72,6 +91,7 @@ type ScanState = {
 
 export interface Interface {
   readonly get: (name: string) => Effect.Effect<Info | undefined>
+  readonly require: (name: string) => Effect.Effect<Info, NotFoundError>
   readonly all: () => Effect.Effect<Info[]>
   readonly dirs: () => Effect.Effect<string[]>
   readonly available: (agent?: Agent.Info) => Effect.Effect<Info[]>
@@ -87,7 +107,7 @@ const add = Effect.fnUntraced(function* (state: State, match: string, bus: Bus.I
         const message = ConfigMarkdown.FrontmatterError.isInstance(err)
           ? err.data.message
           : `Failed to parse skill ${match}`
-        const { Session } = yield* Effect.promise(() => import("@/session"))
+        const { Session } = yield* Effect.promise(() => import("@/session/session"))
         yield* bus.publish(Session.Event.Error, { error: new NamedError.Unknown({ message }).toObject() })
         log.error("failed to load skill", { skill: match, err })
         return undefined
@@ -97,21 +117,20 @@ const add = Effect.fnUntraced(function* (state: State, match: string, bus: Bus.I
 
   if (!md) return
 
-  const parsed = Info.pick({ name: true, description: true }).safeParse(md.data)
-  if (!parsed.success) return
+  if (!isSkillFrontmatter(md.data)) return
 
-  if (state.skills[parsed.data.name]) {
+  if (state.skills[md.data.name]) {
     log.warn("duplicate skill name", {
-      name: parsed.data.name,
-      existing: state.skills[parsed.data.name].location,
+      name: md.data.name,
+      existing: state.skills[md.data.name].location,
       duplicate: match,
     })
   }
 
   state.dirs.add(path.dirname(match))
-  state.skills[parsed.data.name] = {
-    name: parsed.data.name,
-    description: parsed.data.description,
+  state.skills[md.data.name] = {
+    name: md.data.name,
+    description: md.data.description,
     location: match,
     content: md.content,
   }
@@ -151,21 +170,31 @@ const discoverSkills = Effect.fnUntraced(function* (
   config: Config.Interface,
   discovery: Discovery.Interface,
   fsys: AppFileSystem.Interface,
+  global: Global.Interface,
+  disableExternalSkills: boolean,
+  disableClaudeCodeSkills: boolean,
   directory: string,
   worktree: string,
 ) {
   const state: ScanState = { matches: new Set(), dirs: new Set() }
 
-  if (!Flag.KILO_DISABLE_EXTERNAL_SKILLS) {
-    for (const dir of EXTERNAL_DIRS) {
-      const root = path.join(Global.Path.home, dir)
+  const externalDirs: string[] = []
+  if (!disableExternalSkills) {
+    if (!disableClaudeCodeSkills) externalDirs.push(CLAUDE_EXTERNAL_DIR)
+    externalDirs.push(AGENTS_EXTERNAL_DIR)
+
+    for (const dir of externalDirs) {
+      const root = path.join(global.home, dir)
       if (!(yield* fsys.isDir(root))) continue
       yield* scan(state, root, EXTERNAL_SKILL_PATTERN, { dot: true, scope: "global" })
     }
 
-    const upDirs = yield* fsys
-      .up({ targets: EXTERNAL_DIRS, start: directory, stop: worktree })
+    // kilocode_change start
+    const local = yield* fsys
+      .up({ targets: externalDirs, start: directory, stop: worktree })
       .pipe(Effect.catch(() => Effect.succeed([] as string[])))
+    const upDirs = [...(yield* primaryPaths(directory, worktree, externalDirs)), ...local]
+    // kilocode_change end
 
     for (const root of upDirs) {
       yield* scan(state, root, EXTERNAL_SKILL_PATTERN, { dot: true, scope: "project" })
@@ -179,7 +208,7 @@ const discoverSkills = Effect.fnUntraced(function* (
 
   const cfg = yield* config.get()
   for (const item of cfg.skills?.paths ?? []) {
-    const expanded = item.startsWith("~/") ? path.join(os.homedir(), item.slice(2)) : item
+    const expanded = item.startsWith("~/") ? path.join(global.home, item.slice(2)) : item
     const dir = path.isAbsolute(expanded) ? expanded : path.join(directory, expanded)
     if (!(yield* fsys.isDir(dir))) {
       log.warn("skill path not found", { path: dir })
@@ -214,10 +243,7 @@ const loadSkills = Effect.fnUntraced(function* (state: State, discovered: Discov
   }
   // kilocode_change end
 
-  yield* Effect.forEach(discovered.matches, (match) => add(state, match, bus), {
-    concurrency: "unbounded",
-    discard: true,
-  })
+  for (const match of discovered.matches) yield* add(state, match, bus) // kilocode_change
 
   log.info("init", { count: Object.keys(state.skills).length })
 })
@@ -231,13 +257,25 @@ export const layer = Layer.effect(
     const config = yield* Config.Service
     const bus = yield* Bus.Service
     const fsys = yield* AppFileSystem.Service
+    const global = yield* Global.Service
+    const flags = yield* RuntimeFlags.Service
+    const git = yield* Git.Service // kilocode_change
     const discovered = yield* InstanceState.make(
       Effect.fn("Skill.discovery")(function* (ctx) {
-        return yield* discoverSkills(config, discovery, fsys, ctx.directory, ctx.worktree)
+        return yield* discoverSkills(
+          config,
+          discovery,
+          fsys,
+          global,
+          flags.disableExternalSkills,
+          flags.disableClaudeCodeSkills,
+          ctx.directory,
+          ctx.worktree, // kilocode_change
+        ).pipe(Effect.provideService(Git.Service, git)) // kilocode_change
       }),
     )
     const state = yield* InstanceState.make(
-      Effect.fn("Skill.state")(function* (ctx) {
+      Effect.fn("Skill.state")(function* () {
         const s: State = { skills: {}, dirs: new Set() }
         yield* loadSkills(s, yield* InstanceState.get(discovered), bus)
         return s
@@ -247,6 +285,13 @@ export const layer = Layer.effect(
     const get = Effect.fn("Skill.get")(function* (name: string) {
       const s = yield* InstanceState.get(state)
       return s.skills[name]
+    })
+
+    const require = Effect.fn("Skill.require")(function* (name: string) {
+      const s = yield* InstanceState.get(state)
+      const info = s.skills[name]
+      if (info) return info
+      return yield* new NotFoundError({ name, available: Object.keys(s.skills).toSorted() })
     })
 
     const all = Effect.fn("Skill.all")(function* () {
@@ -265,31 +310,28 @@ export const layer = Layer.effect(
       return list.filter((skill) => Permission.evaluate("skill", skill.name, agent.permission).action !== "deny")
     })
 
-    return Service.of({ get, all, dirs, available })
+    return Service.of({ get, require, all, dirs, available })
   }),
 )
 
 export const defaultLayer = layer.pipe(
+  Layer.provide(Git.defaultLayer), // kilocode_change
   Layer.provide(Discovery.defaultLayer),
   Layer.provide(Config.defaultLayer),
   Layer.provide(Bus.layer),
   Layer.provide(AppFileSystem.defaultLayer),
+  Layer.provide(Global.layer),
+  Layer.provide(RuntimeFlags.defaultLayer),
 )
 
-// kilocode_change start - legacy promise helpers for Kilo callsites
-const { runPromise } = makeRuntime(Service, defaultLayer)
-export const all = () => runPromise((svc) => svc.all())
-export const get = (name: string) => runPromise((svc) => svc.get(name))
-export const dirs = () => runPromise((svc) => svc.dirs())
-// kilocode_change end
-
 export function fmt(list: Info[], opts: { verbose: boolean }) {
-  if (list.length === 0) return "No skills are currently available."
+  const described = list.filter((skill) => skill.description !== undefined)
+  if (described.length === 0) return "No skills are currently available."
   if (opts.verbose) {
     return [
       "<available_skills>",
-      ...list
-        .sort((a, b) => a.name.localeCompare(b.name))
+      ...described
+        .toSorted((a, b) => a.name.localeCompare(b.name))
         .flatMap((skill) => [
           "  <skill>",
           `    <name>${skill.name}</name>`,
@@ -303,21 +345,10 @@ export function fmt(list: Info[], opts: { verbose: boolean }) {
 
   return [
     "## Available Skills",
-    ...list
+    ...described
       .toSorted((a, b) => a.name.localeCompare(b.name))
       .map((skill) => `- **${skill.name}**: ${skill.description}`),
   ].join("\n")
 }
-
-// kilocode_change start - skill removal
-export async function remove(location: string) {
-  if (location === BUILTIN_LOCATION) {
-    throw new Error("cannot remove built-in skill")
-  }
-  const resolved = path.resolve(location)
-  const dir = path.dirname(resolved)
-  await rm(dir, { recursive: true, force: true })
-}
-// kilocode_change end
 
 export * as Skill from "."

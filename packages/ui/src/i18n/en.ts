@@ -53,6 +53,15 @@ export const dict: Record<string, string> = {
   "ui.sessionTurn.error.freeUsageExceeded": "Free usage exceeded",
   "ui.sessionTurn.error.addCredits": "Add credits",
 
+  "dialog.usageExceeded.freeTier.title": "Free limit reached",
+  "dialog.usageExceeded.freeTier.description":
+    "Subscribe to Kilo Go for reliable access to the best open-source models, starting at $5/month.",
+  "dialog.usageExceeded.freeTier.actionLabel": "Subscribe",
+  "dialog.usageExceeded.accountRateLimit.title": "Go limit reached",
+  "dialog.usageExceeded.accountRateLimit.description":
+    "Usage limit reached. To continue using this model now, enable usage from your available balance",
+  "dialog.usageExceeded.accountRateLimit.actionLabel": "Open settings",
+
   "ui.sessionTurn.status.delegating": "Delegating work",
   "ui.sessionTurn.status.delegatingWaitingPermission": "Subagent waiting for permission",
   "ui.sessionTurn.status.delegatingWaitingQuestion": "Subagent waiting for response",
@@ -102,6 +111,18 @@ export const dict: Record<string, string> = {
   "ui.textField.copied": "Copied",
 
   "ui.imagePreview.alt": "Image preview",
+  // kilocode_change start
+  "ui.mermaid.rendering": "Rendering Mermaid diagram...",
+  "ui.mermaid.renderError": "Mermaid render failed: {{message}}",
+  "ui.mermaid.errorDefault": "Unable to render Mermaid diagram.",
+  "ui.mermaid.errorEmpty": "Mermaid rendered an empty diagram.",
+  "ui.mermaid.download": "Download",
+  "ui.mermaid.copySource": "Copy Mermaid source",
+  "ui.mermaid.copySvg": "Copy SVG",
+  "ui.mermaid.copyPng": "Copy PNG",
+  "ui.mermaid.downloadSvg": "Download SVG",
+  "ui.mermaid.downloadPng": "Download PNG",
+  // kilocode_change end
   "ui.scrollView.ariaLabel": "scrollable content",
 
   "ui.tool.read": "Read",
@@ -112,7 +133,6 @@ export const dict: Record<string, string> = {
   "ui.tool.task": "Task",
   "ui.tool.webfetch": "Webfetch",
   "ui.tool.websearch": "Web Search",
-  "ui.tool.codesearch": "Code Search",
   "ui.tool.shell": "Shell",
   "ui.tool.patch": "Patch",
   "ui.tool.todos": "To-dos",

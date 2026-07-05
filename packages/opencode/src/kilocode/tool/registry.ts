@@ -1,58 +1,127 @@
 // kilocode_change - new file
 import { CodebaseSearchTool } from "../../tool/warpgrep"
 import { RecallTool } from "../../tool/recall"
+import { AgentManagerModelsTool } from "./agent-manager-models"
 import { AgentManagerTool } from "./agent-manager"
+import { BackgroundProcessTool } from "./background-process"
+import { InteractiveTerminalTool } from "./interactive-terminal"
+import { NotebookEditTool, NotebookExecuteTool, NotebookReadTool } from "./notebook-host"
 import * as Tool from "../../tool/tool"
-import { Flag } from "@/flag/flag"
+import { Flag } from "@opencode-ai/core/flag/flag"
 import { Effect } from "effect"
-import { Log } from "@/util"
+import { Notebook } from "@/kilocode/notebook/service"
+import * as Log from "@opencode-ai/core/util/log"
 import { Agent } from "@/agent/agent"
 import * as Truncate from "@/tool/truncate"
+import type { Config } from "@/config/config"
 
 const log = Log.create({ service: "kilocode-tool-registry" })
-type Deps = { agent: Agent.Interface; truncate: Truncate.Interface }
+type Deps = { agent: Agent.Interface; truncate: Truncate.Interface; indexing?: boolean }
+type Loaders = {
+  indexing?: () => Promise<{ KiloIndexing: { ready: () => boolean } }>
+  semantic?: () => Promise<Pick<typeof import("@/kilocode/tool/semantic-search"), "SemanticSearchTool">>
+}
 
 export namespace KiloToolRegistry {
+  const hint =
+    "- When you are doing an open-ended search where you do not know the exact symbol name, use the `semantic_search` tool first to narrow down the search scope, then follow up with `Grep` and/or `Read`"
+
+  export function indexing(
+    config: Pick<Config.Info, "indexing">,
+    global?: Pick<Config.Info, "indexing">,
+  ): boolean | undefined {
+    return config.indexing?.enabled ?? global?.indexing?.enabled
+  }
+
+  export function usePatch(input: { modelID: string; family?: string }) {
+    if (process.env["KILO_E2E_LLM_URL"]) return true
+
+    const id = input.modelID.toLowerCase()
+    const family = input.family?.toLowerCase()
+    if (id.includes("gpt-4") || family?.startsWith("gpt-4")) return false
+    if (id.includes("oss") || family?.includes("oss") || family === "gpt-image") return false
+    if (id.includes("gpt-")) return true
+    return family?.startsWith("gpt") ?? false
+  }
+
   /** Resolve Kilo-specific tool Infos outside any InstanceState, so their Truncate/Agent deps are
    * satisfied at the outer registry scope instead of leaking into InstanceState's Effect. */
-  export function infos() {
+  export function infos(notebook?: Notebook.Interface) {
     return Effect.gen(function* () {
       const codebase = yield* CodebaseSearchTool
       const recall = yield* RecallTool
+      const managerModels = yield* AgentManagerModelsTool
       const manager = yield* AgentManagerTool
-      return { codebase, recall, manager }
+      const process = yield* BackgroundProcessTool
+      const terminal = yield* InteractiveTerminalTool
+      if (!notebook) return { codebase, recall, managerModels, manager, process, terminal }
+      const tools = yield* Effect.all({
+        notebookRead: NotebookReadTool,
+        notebookEdit: NotebookEditTool,
+        notebookExecute: NotebookExecuteTool,
+      }).pipe(Effect.provideService(Notebook.Service, notebook))
+      return { codebase, recall, managerModels, manager, process, terminal, ...tools }
     })
   }
 
   /** Finalize Kilo-specific tools into Tool.Defs. Call this inside the InstanceState state Effect —
    * it has no Service deps beyond what Tool.init itself needs. */
-  export function build(tools: { codebase: Tool.Info; recall: Tool.Info; manager: Tool.Info }, deps: Deps) {
+  export function build(
+    tools: {
+      codebase: Tool.Info
+      recall: Tool.Info
+      managerModels: Tool.Info
+      manager: Tool.Info
+      process: Tool.Info
+      terminal?: Tool.Info
+      notebookRead?: Tool.Info
+      notebookEdit?: Tool.Info
+      notebookExecute?: Tool.Info
+    },
+    deps: Deps,
+    loaders: Loaders = {},
+  ) {
     return Effect.gen(function* () {
       const base = yield* Effect.all({
         codebase: Tool.init(tools.codebase),
         recall: Tool.init(tools.recall),
+        managerModels: Tool.init(tools.managerModels),
         manager: Tool.init(tools.manager),
+        process: Tool.init(tools.process),
       })
-      const semantic = yield* semanticTool(deps)
-      return { ...base, semantic }
+      const terminal = tools.terminal ? yield* Tool.init(tools.terminal) : undefined
+      const notebooks =
+        tools.notebookRead && tools.notebookEdit && tools.notebookExecute
+          ? yield* Effect.all({
+              notebookRead: Tool.init(tools.notebookRead),
+              notebookEdit: Tool.init(tools.notebookEdit),
+              notebookExecute: Tool.init(tools.notebookExecute),
+            })
+          : {}
+      const semantic = yield* semanticTool(deps, loaders)
+      return { ...base, terminal, ...notebooks, semantic }
     })
   }
 
-  function semanticTool(deps: Deps) {
+  function semanticTool(deps: Deps, loaders: Loaders) {
     return Effect.gen(function* () {
-      const ready = yield* Effect.tryPromise(() =>
-        import("@/kilocode/indexing").then((mod) => mod.KiloIndexing.ready()),
-      ).pipe(
-        Effect.catch((err) =>
-          Effect.sync(() => {
-            log.warn("semantic search unavailable", { err })
-            return false
-          }),
-        ),
-      )
+      const ready = yield* deps.indexing === undefined
+        ? (() => {
+            const indexing = loaders.indexing ?? (() => import("@/kilocode/indexing"))
+            return Effect.tryPromise(() => indexing().then((mod) => mod.KiloIndexing.ready())).pipe(
+              Effect.catch((err) =>
+                Effect.sync(() => {
+                  log.warn("semantic search unavailable", { err })
+                  return false
+                }),
+              ),
+            )
+          })()
+        : Effect.succeed(deps.indexing)
       if (!ready) return undefined
 
-      const mod = yield* Effect.tryPromise(() => import("@/kilocode/tool/semantic-search")).pipe(
+      const semantic = loaders.semantic ?? (() => import("@/kilocode/tool/semantic-search"))
+      const mod = yield* Effect.tryPromise(() => semantic()).pipe(
         Effect.catch((err) =>
           Effect.sync(() => {
             log.warn("semantic search tool unavailable", { err })
@@ -71,37 +140,51 @@ export namespace KiloToolRegistry {
     })
   }
 
-  /** Override question-tool client gating (adds "vscode" to allowed clients) */
-  export function question(): boolean {
-    return ["app", "cli", "desktop", "vscode"].includes(Flag.KILO_CLIENT) || Flag.KILO_ENABLE_QUESTION_TOOL
-  }
-
-  /** Plan tool is always registered in Kilo (gated by agent permission instead) */
-  export function plan(): boolean {
-    return true
-  }
-
-  /** Suggest tool is only registered for cli and vscode clients */
-  export function suggest(tool: Tool.Def): Tool.Def[] {
-    return ["cli", "vscode"].includes(Flag.KILO_CLIENT) ? [tool] : []
+  /** Hide human-driven tools from agents that cannot interact with the user directly. */
+  export function available(tool: Tool.Def, agent: Agent.Info) {
+    if (tool.id !== "interactive_terminal") return true
+    return agent.mode === "primary"
   }
 
   /** Kilo-specific tools to append to the builtin list */
   export function extra(
-    tools: { codebase: Tool.Def; semantic?: Tool.Def; recall: Tool.Def; manager: Tool.Def },
-    cfg: { experimental?: { codebase_search?: boolean; agent_manager_tool?: boolean } },
+    tools: {
+      codebase: Tool.Def
+      semantic?: Tool.Def
+      recall: Tool.Def
+      managerModels: Tool.Def
+      manager: Tool.Def
+      process: Tool.Def
+      terminal?: Tool.Def
+      notebookRead?: Tool.Def
+      notebookEdit?: Tool.Def
+      notebookExecute?: Tool.Def
+    },
+    cfg: { experimental?: { codebase_search?: boolean; native_notebook_tools?: boolean } },
   ): Tool.Def[] {
     return [
       ...(cfg.experimental?.codebase_search === true ? [tools.codebase] : []),
       ...(tools.semantic ? [tools.semantic] : []),
       tools.recall,
-      // The extension is the only client that can consume the Agent Manager start event.
-      ...(Flag.KILO_CLIENT === "vscode" && cfg.experimental?.agent_manager_tool === true ? [tools.manager] : []),
+      ...(Flag.KILO_CLIENT === "cli" || Flag.KILO_CLIENT === "vscode" ? [tools.process] : []),
+      ...(Flag.KILO_CLIENT === "cli" && tools.terminal ? [tools.terminal] : []),
+      // Agent Manager tools are useful only when the extension can create and display their sessions.
+      ...(Flag.KILO_CLIENT === "vscode" ? [tools.managerModels, tools.manager] : []),
+      ...(Flag.KILO_CLIENT === "vscode" &&
+      cfg.experimental?.native_notebook_tools === true &&
+      tools.notebookRead &&
+      tools.notebookEdit &&
+      tools.notebookExecute
+        ? [tools.notebookRead, tools.notebookEdit, tools.notebookExecute]
+        : []),
     ]
   }
 
-  /** Check for E2E LLM URL (uses KILO_E2E_LLM_URL env var) */
-  export function e2e(): boolean {
-    return !!process.env["KILO_E2E_LLM_URL"]
+  export function describe(tools: Tool.Def[], extra: { semantic?: Tool.Def }): Tool.Def[] {
+    if (!extra.semantic) return tools
+    return tools.map((tool) => {
+      if (tool.id !== "glob" && tool.id !== "grep") return tool
+      return { ...tool, description: `${tool.description}\n${hint}` }
+    })
   }
 }

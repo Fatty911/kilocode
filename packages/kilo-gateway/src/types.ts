@@ -33,6 +33,13 @@ export interface KilocodeBalance {
   balance: number
 }
 
+export interface KiloPassState {
+  currentPeriodBaseCreditsUsd: number
+  currentPeriodUsageUsd: number
+  currentPeriodBonusCreditsUsd: number
+  nextBillingAt?: string | null
+}
+
 export interface PollOptions<T> {
   interval: number
   maxAttempts: number
@@ -94,6 +101,11 @@ export interface KiloProviderOptions {
    * Provider name for identification
    */
   name?: string
+
+  /**
+   * Data collection preference for upstream provider routing
+   */
+  dataCollection?: "allow" | "deny"
 
   /**
    * Custom fetch function
@@ -162,6 +174,7 @@ export interface ProviderInfo {
 export type KiloProvider = Provider & {
   alibaba(modelId: string): LanguageModel
   anthropic(modelId: string): LanguageModel
+  mistral(modelId: string): LanguageModel
   openai(modelId: string): LanguageModel
   openaiCompatible(modelId: string): LanguageModel
 }

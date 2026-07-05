@@ -51,6 +51,15 @@ export const dict = {
   "ui.sessionTurn.error.freeUsageExceeded": "Przekroczono limit darmowego użytkowania",
   "ui.sessionTurn.error.addCredits": "Dodaj kredyty",
 
+  "dialog.usageExceeded.freeTier.title": "Osiągnięto limit darmowy",
+  "dialog.usageExceeded.freeTier.description":
+    "Subskrybuj Kilo Go, aby uzyskać niezawodny dostęp do najlepszych modeli open source, od $5/miesiąc.",
+  "dialog.usageExceeded.freeTier.actionLabel": "Subskrybuj",
+  "dialog.usageExceeded.accountRateLimit.title": "Osiągnięto limit Go",
+  "dialog.usageExceeded.accountRateLimit.description":
+    "Osiągnięto limit użycia. Aby kontynuować korzystanie z tego modelu teraz, włącz użycie z dostępnego salda",
+  "dialog.usageExceeded.accountRateLimit.actionLabel": "Otwórz ustawienia",
+
   "ui.sessionTurn.status.delegating": "Delegowanie pracy",
   "ui.sessionTurn.status.delegatingWaitingPermission": "Subagent waiting for permission",
   "ui.sessionTurn.status.delegatingWaitingQuestion": "Subagent waiting for response",
@@ -95,6 +104,18 @@ export const dict = {
   "ui.textField.copied": "Skopiowano",
 
   "ui.imagePreview.alt": "Podgląd obrazu",
+  // kilocode_change start
+  "ui.mermaid.rendering": "Renderowanie diagramu Mermaid...",
+  "ui.mermaid.renderError": "Renderowanie Mermaid nie powiodło się: {{message}}",
+  "ui.mermaid.errorDefault": "Nie można wyrenderować diagramu Mermaid.",
+  "ui.mermaid.errorEmpty": "Mermaid wyrenderował pusty diagram.",
+  "ui.mermaid.download": "Pobierz",
+  "ui.mermaid.copySource": "Kopiuj źródło Mermaid",
+  "ui.mermaid.copySvg": "Kopiuj SVG",
+  "ui.mermaid.copyPng": "Kopiuj PNG",
+  "ui.mermaid.downloadSvg": "Pobierz SVG",
+  "ui.mermaid.downloadPng": "Pobierz PNG",
+  // kilocode_change end
   "ui.scrollView.ariaLabel": "treść przewijana",
 
   "ui.tool.read": "Odczyt",
@@ -104,7 +125,6 @@ export const dict = {
   "ui.tool.grep": "Grep",
   "ui.tool.webfetch": "Pobieranie sieciowe",
   "ui.tool.websearch": "Wyszukiwanie w sieci",
-  "ui.tool.codesearch": "Wyszukiwanie kodu",
   "ui.tool.shell": "Terminal",
   "ui.tool.patch": "Patch",
   "ui.tool.todos": "Zadania",

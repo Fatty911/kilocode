@@ -1,41 +1,47 @@
 package ai.kilocode.client.session.ui
 
+import ai.kilocode.client.actions.KiloActionPlaces
 import ai.kilocode.client.plugin.KiloBundle
-import ai.kilocode.client.session.update.SessionController
-import ai.kilocode.client.session.update.SessionControllerEvent
-import ai.kilocode.client.session.update.SessionControllerListener
+import ai.kilocode.client.session.controller.SessionController
+import ai.kilocode.client.session.controller.SessionControllerEvent
+import ai.kilocode.client.session.controller.SessionControllerListener
+import ai.kilocode.client.session.ui.style.SessionEditorStyle
+import ai.kilocode.client.session.ui.style.SessionEditorStyleTarget
+import ai.kilocode.client.session.ui.style.SessionUiStyle
+import ai.kilocode.client.ui.UiStyle
+import com.intellij.ide.DataManager
 import com.intellij.icons.AllIcons
+import com.intellij.openapi.actionSystem.ActionGroup
+import com.intellij.openapi.actionSystem.ActionManager
+import com.intellij.openapi.actionSystem.AnActionEvent
+import com.intellij.openapi.actionSystem.DefaultActionGroup
 import com.intellij.openapi.Disposable
+import com.intellij.openapi.project.DumbAwareAction
+import com.intellij.openapi.ui.popup.JBPopupFactory
 import com.intellij.openapi.util.Disposer
-import com.intellij.ui.JBColor
 import com.intellij.ui.components.ActionLink
 import com.intellij.ui.components.JBLabel
 import com.intellij.ui.components.JBScrollPane
 import com.intellij.ui.components.JBTextArea
+import com.intellij.util.ui.JBDimension
 import com.intellij.util.ui.JBUI
-import com.intellij.util.ui.UIUtil
+import com.intellij.util.ui.components.BorderLayoutPanel
 import java.awt.BorderLayout
 import java.awt.Cursor
 import java.awt.Dimension
 import java.awt.event.MouseAdapter
 import java.awt.event.MouseEvent
-import javax.swing.JPanel
 import javax.swing.ScrollPaneConstants
-import javax.swing.UIManager
 
 class ConnectionPanel(
     parent: Disposable,
     private val controller: SessionController,
-) : JPanel(BorderLayout()), SessionControllerListener, Disposable {
+) : BorderLayoutPanel(), SessionControllerListener, Disposable, SessionEditorStyleTarget {
 
     companion object {
+        internal const val CLI_GROUP_ID = "Kilo.CliGroup"
         private const val DETAILS_LINES = 10
-        private val ERROR = JBColor.namedColor("Label.errorForeground", UIUtil.getErrorForeground())
-        private val WARNING = JBColor.lazy {
-            UIManager.getColor("Component.warningFocusColor")
-                ?: UIManager.getColor("Label.warningForeground")
-                ?: UIUtil.getContextHelpForeground()
-        }
+        private const val CHROME = 2
     }
 
     private val click = object : MouseAdapter() {
@@ -44,13 +50,12 @@ class ConnectionPanel(
         }
     }
 
-    private val header = JPanel(BorderLayout()).apply {
-        border = JBUI.Borders.empty(4, 8, 0, 8)
-        isOpaque = false
+    private val header = BorderLayoutPanel().apply {
+        border = JBUI.Borders.empty(UiStyle.Gap.sm(), UiStyle.Gap.lg(), UiStyle.Gap.sm(), UiStyle.Gap.lg())
     }
 
-    private val left = JPanel(BorderLayout(JBUI.scale(4), 0)).apply {
-        isOpaque = false
+    private val left = BorderLayoutPanel().apply {
+        layout = BorderLayout(UiStyle.Gap.sm(), 0)
         addMouseListener(click)
     }
 
@@ -60,12 +65,12 @@ class ConnectionPanel(
     }
 
     private val label = JBLabel().apply {
-        foreground = UIUtil.getContextHelpForeground()
+        foreground = UiStyle.Colors.weak()
         addMouseListener(click)
     }
 
     private val retry = ActionLink(KiloBundle.message("session.connection.retry")) {
-        controller.retryConnection()
+        showRecoveryPopup()
     }.apply {
         isVisible = false
         horizontalAlignment = JBLabel.RIGHT
@@ -75,14 +80,16 @@ class ConnectionPanel(
 
     private val details = JBTextArea().apply {
         isEditable = false
+        // Details should read as inline expandable text, not a nested text box.
         isOpaque = false
         lineWrap = true
         wrapStyleWord = true
-        foreground = UIUtil.getLabelForeground()
+        foreground = UiStyle.Colors.fg()
     }
 
     private val scroll = JBScrollPane(details).apply {
-        border = JBUI.Borders.empty(0, 8, 4, 0)
+        border = detailsBorder()
+        // Match the banner background while retaining platform scroll behavior.
         isOpaque = false
         viewport.isOpaque = false
         horizontalScrollBarPolicy = ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER
@@ -95,9 +102,9 @@ class ConnectionPanel(
 
     init {
         Disposer.register(parent, this)
+        // Keep the banner solid so expanded details cover transcript content beneath it.
         isOpaque = true
-        background = UIUtil.getPanelBackground()
-        border = JBUI.Borders.customLine(UIUtil.getBoundsColor(), 1, 0, 0, 0)
+        applyStyle(SessionEditorStyle.current())
         left.add(toggle, BorderLayout.WEST)
         left.add(label, BorderLayout.CENTER)
         header.add(left, BorderLayout.CENTER)
@@ -128,7 +135,7 @@ class ConnectionPanel(
     }
 
     private fun showConnecting() {
-        label.foreground = UIUtil.getContextHelpForeground()
+        label.foreground = UiStyle.Colors.weak()
         label.text = KiloBundle.message("session.connection.connecting")
         detail = null
         expanded = false
@@ -139,7 +146,7 @@ class ConnectionPanel(
     }
 
     private fun showError(text: String, detail: String?) {
-        label.foreground = ERROR
+        label.foreground = UiStyle.Colors.errorLabelForeground()
         label.text = text
         retry.isVisible = true
         this.detail = detail?.takeIf { it.isNotBlank() }
@@ -149,7 +156,7 @@ class ConnectionPanel(
     }
 
     private fun showWarning(text: String, detail: String?) {
-        label.foreground = WARNING
+        label.foreground = UiStyle.Colors.warningLabelForeground()
         label.text = text
         retry.isVisible = true
         this.detail = detail?.takeIf { it.isNotBlank() }
@@ -204,14 +211,52 @@ class ConnectionPanel(
         repaint()
     }
 
+    private fun showRecoveryPopup() {
+        JBPopupFactory.getInstance()
+            .createActionGroupPopup(
+                null,
+                recoveryGroup(),
+                DataManager.getInstance().getDataContext(retry),
+                JBPopupFactory.ActionSelectionAid.SPEEDSEARCH,
+                true,
+                KiloActionPlaces.connectionRetryPopup(),
+            )
+            .showUnderneathOf(retry)
+    }
+
+    private fun recoveryGroup(): ActionGroup {
+        val group = DefaultActionGroup()
+        group.add(object : DumbAwareAction(KiloBundle.message("session.connection.retry")) {
+            override fun actionPerformed(e: AnActionEvent) {
+                controller.retryConnection()
+            }
+        })
+        group.addSeparator()
+        ActionManager.getInstance().getAction("Kilo.Restart")?.let { group.add(it) }
+        ActionManager.getInstance().getAction("Kilo.Reinstall")?.let { group.add(it) }
+        return group
+    }
+
     override fun dispose() {
         // no-op
     }
 
+    override fun applyStyle(style: SessionEditorStyle) {
+        background = style.editorScheme.defaultBackground
+        scroll.border = detailsBorder()
+        revalidate()
+        repaint()
+    }
+
+    private fun detailsBorder() = JBUI.Borders.compound(
+        JBUI.Borders.customLineTop(SessionUiStyle.View.Prompt.separator()),
+        JBUI.Borders.empty(UiStyle.Gap.sm(), UiStyle.Gap.lg(), UiStyle.Gap.sm(), 0),
+    )!!
+
     override fun getPreferredSize(): Dimension {
         val size = super.getPreferredSize()
         if (!scroll.isVisible) return size
-        return Dimension(size.width, header.preferredSize.height + scrollHeight())
+        return JBDimension(size.width, header.preferredSize.height + scrollHeight())
     }
 
     private fun scrollHeight(): Int {
@@ -219,7 +264,7 @@ class ConnectionPanel(
         return details.getFontMetrics(details.font).height * rows + scrollChrome()
     }
 
-    private fun scrollChrome() = scroll.insets.top + scroll.insets.bottom + JBUI.scale(2)
+    private fun scrollChrome() = scroll.insets.top + scroll.insets.bottom + JBUI.scale(CHROME)
 
     internal fun summaryText() = label.text
 
@@ -253,8 +298,6 @@ class ConnectionPanel(
     }
 
     internal fun retryFocusable() = retry.isFocusable
-
-    internal fun clickRetry() = retry.doClick()
 
     internal fun hasSeparator() = border != null
 

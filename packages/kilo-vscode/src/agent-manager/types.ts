@@ -8,12 +8,16 @@
  */
 
 import type { SnapshotFileDiff } from "@kilocode/sdk/v2/client"
+import type { DiffImage } from "../diff/types"
 import type { Worktree, ManagedSession, Section } from "./WorktreeStateManager"
 import type { WorktreeStats, LocalStats } from "./GitStatsPoller"
 import type { ApplyConflict } from "./GitOps"
 import type { BranchListItem, WorktreeSetupErrorCode } from "./git-import"
 import type { ExternalWorktreeItem } from "./WorktreeManager"
 import type { RunStatus } from "./run/manager"
+import type { TerminalFont } from "./terminal-font"
+
+export type { TerminalFont }
 
 // ---------------------------------------------------------------------------
 // Shared payload types
@@ -30,6 +34,8 @@ export type WorktreeDiffEntry = SnapshotFileDiff & {
   generatedLike?: boolean
   summarized?: boolean
   stamp?: string
+  kind?: "image"
+  image?: DiffImage
 }
 
 // ---------------------------------------------------------------------------
@@ -126,7 +132,9 @@ interface StateMessage {
   tabOrder?: Record<string, string[]>
   worktreeOrder?: string[]
   sessionsCollapsed?: boolean
+  sidebarCollapsed?: boolean
   reviewDiffStyle?: "unified" | "split"
+  reviewMarkdownRender?: boolean
   isGitRepo?: boolean
   defaultBaseBranch?: string
   runStatuses?: RunStatus[]
@@ -145,6 +153,7 @@ interface TerminalCreatedMessage {
   terminalId: string
   title: string
   wsUrl: string
+  font: TerminalFont
 }
 
 interface TerminalClosedMessage {
@@ -156,6 +165,11 @@ interface TerminalErrorMessage {
   type: "agentManager.terminal.error"
   terminalId?: string
   message: string
+}
+
+interface TerminalFontChangedMessage {
+  type: "agentManager.terminal.fontChanged"
+  font: TerminalFont
 }
 
 interface ErrorOutMessage {
@@ -312,6 +326,7 @@ export type AgentManagerOutMessage =
   | TerminalCreatedMessage
   | TerminalClosedMessage
   | TerminalErrorMessage
+  | TerminalFontChangedMessage
 
 // ---------------------------------------------------------------------------
 // Webview → Extension messages (onMessage)
@@ -346,6 +361,7 @@ interface OpenLocallyIn {
 interface AddSessionToWorktreeIn {
   type: "agentManager.addSessionToWorktree"
   worktreeId: string
+  sessionId?: string
 }
 
 interface CloseSessionIn {
@@ -423,6 +439,8 @@ interface CreateMultiVersionIn {
   baseBranch?: string
   branchName?: string
   modelAllocations?: Array<{ providerID: string; modelID: string; count: number }>
+  /** When set, reconcile each created session's sandbox override to this state. */
+  sandbox?: boolean
 }
 
 interface RenameWorktreeIn {
@@ -455,9 +473,19 @@ interface SetSessionsCollapsedIn {
   collapsed: boolean
 }
 
+interface SetSidebarCollapsedIn {
+  type: "agentManager.setSidebarCollapsed"
+  collapsed: boolean
+}
+
 interface SetReviewDiffStyleIn {
   type: "agentManager.setReviewDiffStyle"
   style: "unified" | "split"
+}
+
+interface SetReviewMarkdownRenderIn {
+  type: "agentManager.setReviewMarkdownRender"
+  render: boolean
 }
 
 interface SetDefaultBaseBranchIn {
@@ -558,6 +586,12 @@ interface PreviewImageIn {
   filename: string
 }
 
+interface SaveImageIn {
+  type: "saveImage"
+  dataUrl: string
+  filename: string
+}
+
 interface LoadMessagesIn {
   type: "loadMessages"
   sessionID: string
@@ -588,6 +622,7 @@ interface SendMessageIn {
   variant?: string
   files?: Array<{ mime: string; url: string; filename?: string; source?: FileSourceIn }>
   agentManagerContext?: string
+  contextDirectory?: string
 }
 
 interface SendCommandIn {
@@ -603,6 +638,38 @@ interface SendCommandIn {
   variant?: string
   files?: Array<{ mime: string; url: string; filename?: string; source?: FileSourceIn }>
   agentManagerContext?: string
+  contextDirectory?: string
+}
+
+interface QuestionReplyIn {
+  type: "questionReply"
+  requestID: string
+  sessionID?: string
+  answers: string[][]
+}
+
+interface RequestSandboxDefaultIn {
+  type: "requestSandboxDefault"
+  requestID?: string
+  agentManagerContext?: string
+  contextDirectory?: string
+}
+
+interface SetSandboxDefaultIn {
+  type: "setSandboxDefault"
+  enabled: boolean
+  requestID: string
+  agentManagerContext?: string
+  contextDirectory?: string
+}
+
+interface ToggleSandboxIn {
+  type: "toggleSandbox"
+  sessionID?: string
+  draftID?: string
+  requestID: string
+  agentManagerContext?: string
+  contextDirectory?: string
 }
 
 interface RequestTerminalContextIn {
@@ -724,7 +791,9 @@ export type AgentManagerInMessage =
   | SetTabOrderIn
   | SetWorktreeOrderIn
   | SetSessionsCollapsedIn
+  | SetSidebarCollapsedIn
   | SetReviewDiffStyleIn
+  | SetReviewMarkdownRenderIn
   | SetDefaultBaseBranchIn
   | RequestExternalWorktreesIn
   | ImportFromBranchIn
@@ -743,9 +812,14 @@ export type AgentManagerInMessage =
   | OpenFileIn
   | GenericOpenFileIn
   | PreviewImageIn
+  | SaveImageIn
   | LoadMessagesIn
   | SendMessageIn
   | SendCommandIn
+  | QuestionReplyIn
+  | RequestSandboxDefaultIn
+  | SetSandboxDefaultIn
+  | ToggleSandboxIn
   | RequestTerminalContextIn
   | ClearSessionIn
   | AbortIn

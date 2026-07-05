@@ -752,11 +752,11 @@ export type Project = {
 }
 
 export type BadRequestError = {
-  data: unknown
-  errors: Array<{
-    [key: string]: unknown
-  }>
-  success: false
+  name: "BadRequest"
+  data: {
+    message: string
+    kind?: "Params" | "Headers" | "Query" | "Body" | "Payload"
+  }
 }
 
 export type NotFoundError = {
@@ -1065,7 +1065,7 @@ export type ProviderConfig = {
         output: Array<"text" | "audio" | "image" | "video" | "pdf">
       }
       experimental?: boolean
-      status?: "alpha" | "beta" | "deprecated"
+      status?: "alpha" | "beta" | "deprecated" | "active"
       options?: {
         [key: string]: unknown
       }
@@ -1374,6 +1374,14 @@ export type Config = {
      */
     openTelemetry?: boolean
     /**
+     * Run agent tools inside a sandbox that restricts writes to project and Kilo state directories and can restrict outbound network access
+     */
+    sandbox?: boolean
+    /**
+     * Restrict outbound network access for model-originated commands and first-party HTTP tools; local MCP servers and plugin hooks are not covered (default: true)
+     */
+    sandbox_restrict_network?: boolean
+    /**
      * Tools that should only be available to primary agents.
      */
     primary_tools?: Array<string>
@@ -1666,6 +1674,9 @@ export type OAuth = {
 export type ApiAuth = {
   type: "api"
   key: string
+  metadata?: {
+    [key: string]: string
+  }
 }
 
 export type WellKnownAuth = {
@@ -3012,7 +3023,7 @@ export type ProviderListResponses = {
             output: Array<"text" | "audio" | "image" | "video" | "pdf">
           }
           experimental?: boolean
-          status?: "alpha" | "beta" | "deprecated"
+          status?: "alpha" | "beta" | "deprecated" | "active"
           options: {
             [key: string]: unknown
           }
@@ -3029,6 +3040,7 @@ export type ProviderListResponses = {
       [key: string]: string
     }
     connected: Array<string>
+    failed: Array<string>
   }
 }
 

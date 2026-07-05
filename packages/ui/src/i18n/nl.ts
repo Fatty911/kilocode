@@ -53,6 +53,17 @@ export const dict: Record<string, string> = {
   "ui.sessionTurn.error.freeUsageExceeded": "Gratis gebruik overschreden",
   "ui.sessionTurn.error.addCredits": "Credits toevoegen",
 
+  // kilocode_change start - complete upstream usage-exceeded translations
+  "dialog.usageExceeded.freeTier.title": "Gratis limiet bereikt",
+  "dialog.usageExceeded.freeTier.description":
+    "Abonneer je op Kilo Go voor betrouwbare toegang tot de beste open-sourcemodellen, vanaf $5 per maand.",
+  "dialog.usageExceeded.freeTier.actionLabel": "Abonneren",
+  "dialog.usageExceeded.accountRateLimit.title": "Go-limiet bereikt",
+  "dialog.usageExceeded.accountRateLimit.description":
+    "Gebruikslimiet bereikt. Schakel gebruik vanuit je beschikbare saldo in om dit model nu te blijven gebruiken",
+  "dialog.usageExceeded.accountRateLimit.actionLabel": "Instellingen openen",
+  // kilocode_change end
+
   "ui.sessionTurn.status.delegating": "Werk delegeren",
   "ui.sessionTurn.status.delegatingWaitingPermission": "Subagent waiting for permission",
   "ui.sessionTurn.status.delegatingWaitingQuestion": "Subagent waiting for response",
@@ -97,6 +108,18 @@ export const dict: Record<string, string> = {
   "ui.textField.copied": "Gekopieerd",
 
   "ui.imagePreview.alt": "Afbeeldingsvoorbeeld",
+  // kilocode_change start
+  "ui.mermaid.rendering": "Mermaid-diagram renderen...",
+  "ui.mermaid.renderError": "Mermaid-rendering mislukt: {{message}}",
+  "ui.mermaid.errorDefault": "Kan Mermaid-diagram niet renderen.",
+  "ui.mermaid.errorEmpty": "Mermaid heeft een leeg diagram gerenderd.",
+  "ui.mermaid.download": "Downloaden",
+  "ui.mermaid.copySource": "Mermaid-bron kopiëren",
+  "ui.mermaid.copySvg": "SVG kopiëren",
+  "ui.mermaid.copyPng": "PNG kopiëren",
+  "ui.mermaid.downloadSvg": "SVG downloaden",
+  "ui.mermaid.downloadPng": "PNG downloaden",
+  // kilocode_change end
   "ui.scrollView.ariaLabel": "scrollbare inhoud",
 
   "ui.fileSearch.placeholder": "Zoeken",

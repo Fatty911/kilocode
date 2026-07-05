@@ -10,6 +10,8 @@ export interface TelemetryProperties {
   vscodeVersion?: string
 }
 
+export type ReviewCommand = "review"
+
 export interface IndexingTelemetryProperties extends Record<string, unknown> {
   source: "scan" | "watcher"
   provider: string
@@ -154,6 +156,10 @@ export namespace Telemetry {
   // LLM
   export function trackLlmCompletion(properties: {
     taskId?: string
+    mode?: "review"
+    feature?: "code_reviews"
+    command?: ReviewCommand
+    tool?: "suggest"
     apiProvider: string
     modelId: string
     inputTokens?: number
@@ -180,8 +186,33 @@ export namespace Telemetry {
     track(TelemetryEvent.AGENT_USED, { agent, sessionId })
   }
 
-  export function trackPlanFollowup(sessionId: string, choice: "new_session" | "continue" | "custom" | "dismissed") {
+  export function trackPlanFollowup(
+    sessionId: string,
+    choice: "new_session" | "continue" | "keep_refining" | "custom" | "dismissed",
+  ) {
     track(TelemetryEvent.PLAN_FOLLOWUP, { sessionId, choice })
+  }
+
+  export function trackSuggestionAccepted(properties: {
+    sessionId: string
+    requestId: string
+    index: number
+    tool: "suggest"
+    command: ReviewCommand
+    actionCount?: number
+  }) {
+    track(TelemetryEvent.SUGGESTION_ACCEPTED, properties)
+  }
+
+  export function trackSuggestionShown(properties: {
+    sessionId: string
+    requestId: string
+    index: number
+    tool: "suggest"
+    command: ReviewCommand
+    actionCount?: number
+  }) {
+    track(TelemetryEvent.SUGGESTION_SHOWN, properties)
   }
 
   export function trackIndexingStarted(properties: IndexingTelemetryProperties) {
@@ -241,7 +272,23 @@ export namespace Telemetry {
     track(TelemetryEvent.ERROR, { error, context })
   }
 
-  export async function shutdown(): Promise<void> {
-    await Client.shutdown()
+  // Feedback
+  export interface FeedbackProperties extends Record<string, unknown> {
+    providerID: string
+    modelID: string
+    variant?: string
+    rating: "up" | "down" | "cleared"
+    previousRating?: "up" | "down"
+    sessionID?: string
+    messageID?: string
+    parentMessageID?: string
+  }
+
+  export function trackFeedback(props: FeedbackProperties) {
+    track(TelemetryEvent.FEEDBACK_SUBMITTED, props)
+  }
+
+  export async function shutdown(timeoutMs?: number): Promise<void> {
+    await Client.shutdown(timeoutMs)
   }
 }

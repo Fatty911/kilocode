@@ -56,6 +56,14 @@ export const dict = {
   "ui.sessionTurn.error.freeUsageExceeded": "免费使用额度已用完",
   "ui.sessionTurn.error.addCredits": "添加积分",
 
+  "dialog.usageExceeded.freeTier.title": "免费额度已用完",
+  "dialog.usageExceeded.freeTier.description": "订阅 Kilo Go，可靠地使用最佳开源模型，每月 $5 起。",
+  "dialog.usageExceeded.freeTier.actionLabel": "订阅",
+  "dialog.usageExceeded.accountRateLimit.title": "Go 额度已用完",
+  "dialog.usageExceeded.accountRateLimit.description":
+    "使用额度已达上限。如需现在继续使用此模型，请从可用余额中启用使用",
+  "dialog.usageExceeded.accountRateLimit.actionLabel": "打开设置",
+
   "ui.sessionTurn.status.delegating": "正在委派工作",
   "ui.sessionTurn.status.delegatingWaitingPermission": "Subagent waiting for permission",
   "ui.sessionTurn.status.delegatingWaitingQuestion": "Subagent waiting for response",
@@ -100,6 +108,18 @@ export const dict = {
   "ui.textField.copied": "已复制",
 
   "ui.imagePreview.alt": "图片预览",
+  // kilocode_change start
+  "ui.mermaid.rendering": "正在渲染 Mermaid 图表...",
+  "ui.mermaid.renderError": "Mermaid 渲染失败：{{message}}",
+  "ui.mermaid.errorDefault": "无法渲染 Mermaid 图表。",
+  "ui.mermaid.errorEmpty": "Mermaid 渲染了一个空图表。",
+  "ui.mermaid.download": "下载",
+  "ui.mermaid.copySource": "复制 Mermaid 源码",
+  "ui.mermaid.copySvg": "复制 SVG",
+  "ui.mermaid.copyPng": "复制 PNG",
+  "ui.mermaid.downloadSvg": "下载 SVG",
+  "ui.mermaid.downloadPng": "下载 PNG",
+  // kilocode_change end
   "ui.scrollView.ariaLabel": "可滚动内容",
 
   "ui.tool.read": "读取",
@@ -109,7 +129,6 @@ export const dict = {
   "ui.tool.grep": "Grep",
   "ui.tool.webfetch": "Webfetch",
   "ui.tool.websearch": "网络搜索",
-  "ui.tool.codesearch": "代码搜索",
   "ui.tool.shell": "Shell",
   "ui.tool.patch": "补丁",
   "ui.tool.todos": "待办",

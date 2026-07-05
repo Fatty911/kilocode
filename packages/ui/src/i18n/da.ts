@@ -51,6 +51,15 @@ export const dict = {
   "ui.sessionTurn.error.freeUsageExceeded": "Gratis forbrug overskredet",
   "ui.sessionTurn.error.addCredits": "Tilføj kreditter",
 
+  "dialog.usageExceeded.freeTier.title": "Gratis grænse nået",
+  "dialog.usageExceeded.freeTier.description":
+    "Abonnér på Kilo Go for pålidelig adgang til de bedste open source-modeller, fra $5/måned.",
+  "dialog.usageExceeded.freeTier.actionLabel": "Abonnér",
+  "dialog.usageExceeded.accountRateLimit.title": "Go-grænse nået",
+  "dialog.usageExceeded.accountRateLimit.description":
+    "Forbrugsgrænse nået. For at fortsætte med at bruge denne model nu, aktivér forbrug fra din tilgængelige saldo",
+  "dialog.usageExceeded.accountRateLimit.actionLabel": "Åbn indstillinger",
+
   "ui.sessionTurn.status.delegating": "Delegerer arbejde",
   "ui.sessionTurn.status.delegatingWaitingPermission": "Subagent waiting for permission",
   "ui.sessionTurn.status.delegatingWaitingQuestion": "Subagent waiting for response",
@@ -95,6 +104,18 @@ export const dict = {
   "ui.textField.copied": "Kopieret",
 
   "ui.imagePreview.alt": "Billedforhåndsvisning",
+  // kilocode_change start
+  "ui.mermaid.rendering": "Renderer Mermaid-diagram...",
+  "ui.mermaid.renderError": "Mermaid-rendering mislykkedes: {{message}}",
+  "ui.mermaid.errorDefault": "Kan ikke rendere Mermaid-diagram.",
+  "ui.mermaid.errorEmpty": "Mermaid renderede et tomt diagram.",
+  "ui.mermaid.download": "Download",
+  "ui.mermaid.copySource": "Kopiér Mermaid-kilde",
+  "ui.mermaid.copySvg": "Kopiér SVG",
+  "ui.mermaid.copyPng": "Kopiér PNG",
+  "ui.mermaid.downloadSvg": "Download SVG",
+  "ui.mermaid.downloadPng": "Download PNG",
+  // kilocode_change end
   "ui.scrollView.ariaLabel": "rulbart indhold",
 
   "ui.tool.read": "Læs",
@@ -104,7 +125,6 @@ export const dict = {
   "ui.tool.grep": "Grep",
   "ui.tool.webfetch": "Webhentning",
   "ui.tool.websearch": "Websøgning",
-  "ui.tool.codesearch": "Kodesøgning",
   "ui.tool.shell": "Shell",
   "ui.tool.patch": "Patch",
   "ui.tool.todos": "Opgaver",

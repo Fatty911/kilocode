@@ -1,13 +1,13 @@
 package ai.kilocode.client.session.ui
 
-import ai.kilocode.client.session.update.SessionController
-import ai.kilocode.client.session.update.SessionControllerEvent
-import ai.kilocode.client.session.update.SessionControllerTestBase
-import ai.kilocode.rpc.dto.ConfigWarningDto
-import ai.kilocode.rpc.dto.KiloAppStateDto
-import ai.kilocode.rpc.dto.KiloAppStatusDto
-import com.intellij.util.ui.UIUtil
+import ai.kilocode.client.session.controller.SessionController
+import ai.kilocode.client.session.controller.SessionControllerEvent
+import ai.kilocode.client.session.controller.SessionControllerTestBase
+import ai.kilocode.client.session.ui.style.SessionEditorStyle
+import ai.kilocode.client.ui.UiStyle
+import com.intellij.ui.components.JBScrollPane
 import java.awt.Dimension
+import javax.swing.border.CompoundBorder
 
 @Suppress("UnstableApiUsage")
 class ConnectionPanelTest : SessionControllerTestBase() {
@@ -45,12 +45,12 @@ class ConnectionPanelTest : SessionControllerTestBase() {
 
         assertTrue(panel.isVisible)
         assertEquals("CLI startup failed", panel.summaryText())
-        assertEquals(UIUtil.getErrorForeground(), panel.summaryColor())
+        assertEquals(UiStyle.Colors.errorLabelForeground(), panel.summaryColor())
         assertTrue(panel.toggleVisible())
         assertFalse(panel.toggleExpanded())
         assertFalse(panel.detailsVisible())
         assertEquals("stderr line\nconfig: HTTP 500: broken", panel.detailsText())
-        assertEquals(UIUtil.getLabelForeground(), panel.detailsColor())
+        assertEquals(UiStyle.Colors.fg(), panel.detailsColor())
         assertTrue(panel.retryVisible())
         assertFalse(panel.retryFocusable())
 
@@ -58,6 +58,7 @@ class ConnectionPanelTest : SessionControllerTestBase() {
 
         assertTrue(panel.toggleExpanded())
         assertTrue(panel.detailsVisible())
+        assertTrue(panel.components.filterIsInstance<JBScrollPane>().single().border is CompoundBorder)
 
         edt { panel.clickToggle() }
 
@@ -79,18 +80,19 @@ class ConnectionPanelTest : SessionControllerTestBase() {
         assertEquals("Try again", panel.retryText())
     }
 
-    fun `test retry click triggers app retry for app error`() {
+    fun `test retry popup group uses cli recovery actions`() {
         edt {
-            controller.model.app = KiloAppStateDto(
-                status = KiloAppStatusDto.ERROR,
-                error = "CLI startup failed",
-            )
             panel.onEvent(SessionControllerEvent.ConnectionChanged.ShowError("CLI startup failed", null))
         }
-        edt { panel.clickRetry() }
-        flush()
+        val xml = requireNotNull(javaClass.classLoader.getResourceAsStream("kilo.jetbrains.frontend.xml"))
+            .bufferedReader()
+            .use { it.readText() }
 
-        assertEquals(1, appRpc.retries)
+        assertTrue(panel.retryVisible())
+        assertEquals("Kilo.CliGroup", ConnectionPanel.CLI_GROUP_ID)
+        assertTrue(xml.contains("<group id=\"Kilo.CliGroup\" text=\"CLI\" popup=\"true\">"))
+        assertTrue(xml.contains("<reference ref=\"Kilo.Restart\"/>"))
+        assertTrue(xml.contains("<reference ref=\"Kilo.Reinstall\"/>"))
     }
 
     fun `test ready warnings show collapsed banner with retry`() {
@@ -103,7 +105,7 @@ class ConnectionPanelTest : SessionControllerTestBase() {
 
         assertTrue(panel.isVisible)
         assertEquals("Configuration warnings", panel.summaryText())
-        assertNotSame(UIUtil.getContextHelpForeground(), panel.summaryColor())
+        assertEquals(UiStyle.Colors.warningLabelForeground(), panel.summaryColor())
         assertTrue(panel.toggleVisible())
         assertFalse(panel.toggleExpanded())
         assertFalse(panel.detailsVisible())
@@ -118,20 +120,6 @@ class ConnectionPanelTest : SessionControllerTestBase() {
 
         assertTrue(panel.toggleExpanded())
         assertTrue(panel.detailsVisible())
-    }
-
-    fun `test retry click triggers app retry for warnings`() {
-        edt {
-            controller.model.app = KiloAppStateDto(
-                status = KiloAppStatusDto.READY,
-                warnings = listOf(ConfigWarningDto(path = ".kilo/kilo.json", message = "Invalid JSON")),
-            )
-            panel.onEvent(SessionControllerEvent.ConnectionChanged.ShowWarning("Configuration warnings", null))
-        }
-        edt { panel.clickRetry() }
-        flush()
-
-        assertEquals(1, appRpc.retries)
     }
 
     fun `test expanded details height is capped at ten lines`() {
@@ -155,8 +143,10 @@ class ConnectionPanelTest : SessionControllerTestBase() {
         assertFalse(panel.isVisible)
     }
 
-    fun `test panel has top separator`() {
-        assertTrue(panel.hasSeparator())
+    fun `test panel uses prompt background without separator`() {
+        assertTrue(panel.isOpaque)
+        assertEquals(SessionEditorStyle.current().editorScheme.defaultBackground.rgb, panel.background.rgb)
+        assertFalse(panel.hasSeparator())
     }
 
     private fun lines(count: Int) = (1..count).joinToString("\n") { "line $it" }

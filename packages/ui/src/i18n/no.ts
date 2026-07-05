@@ -55,6 +55,15 @@ export const dict: Record<Keys, string> = {
   "ui.sessionTurn.error.freeUsageExceeded": "Gratis bruk overskredet",
   "ui.sessionTurn.error.addCredits": "Legg til kreditt",
 
+  "dialog.usageExceeded.freeTier.title": "Gratis grense nådd",
+  "dialog.usageExceeded.freeTier.description":
+    "Abonner på Kilo Go for pålitelig tilgang til de beste åpen kildekode-modellene, fra $5/måned.",
+  "dialog.usageExceeded.freeTier.actionLabel": "Abonner",
+  "dialog.usageExceeded.accountRateLimit.title": "Go-grense nådd",
+  "dialog.usageExceeded.accountRateLimit.description":
+    "Bruksgrense nådd. For å fortsette å bruke denne modellen nå, aktiver bruk fra din tilgjengelige saldo",
+  "dialog.usageExceeded.accountRateLimit.actionLabel": "Åpne innstillinger",
+
   "ui.sessionTurn.status.delegating": "Delegerer arbeid",
   "ui.sessionTurn.status.delegatingWaitingPermission": "Subagent waiting for permission",
   "ui.sessionTurn.status.delegatingWaitingQuestion": "Subagent waiting for response",
@@ -99,6 +108,18 @@ export const dict: Record<Keys, string> = {
   "ui.textField.copied": "Kopiert",
 
   "ui.imagePreview.alt": "Bildeforhåndsvisning",
+  // kilocode_change start
+  "ui.mermaid.rendering": "Gjengir Mermaid-diagram...",
+  "ui.mermaid.renderError": "Mermaid-gjengivelse mislyktes: {{message}}",
+  "ui.mermaid.errorDefault": "Kan ikke gjengi Mermaid-diagram.",
+  "ui.mermaid.errorEmpty": "Mermaid gjenga et tomt diagram.",
+  "ui.mermaid.download": "Last ned",
+  "ui.mermaid.copySource": "Kopier Mermaid-kilde",
+  "ui.mermaid.copySvg": "Kopier SVG",
+  "ui.mermaid.copyPng": "Kopier PNG",
+  "ui.mermaid.downloadSvg": "Last ned SVG",
+  "ui.mermaid.downloadPng": "Last ned PNG",
+  // kilocode_change end
   "ui.scrollView.ariaLabel": "rullbart innhold",
 
   "ui.tool.read": "Les",
@@ -108,7 +129,6 @@ export const dict: Record<Keys, string> = {
   "ui.tool.grep": "Grep",
   "ui.tool.webfetch": "Webhenting",
   "ui.tool.websearch": "Nettsøk",
-  "ui.tool.codesearch": "Kodesøk",
   "ui.tool.shell": "Shell",
   "ui.tool.patch": "Patch",
   "ui.tool.todos": "Gjøremål",

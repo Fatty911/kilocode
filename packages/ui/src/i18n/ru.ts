@@ -51,6 +51,15 @@ export const dict = {
   "ui.sessionTurn.error.freeUsageExceeded": "Лимит бесплатного использования превышен",
   "ui.sessionTurn.error.addCredits": "Добавить кредиты",
 
+  "dialog.usageExceeded.freeTier.title": "Достигнут бесплатный лимит",
+  "dialog.usageExceeded.freeTier.description":
+    "Подпишитесь на Kilo Go для надёжного доступа к лучшим моделям с открытым исходным кодом, от $5/месяц.",
+  "dialog.usageExceeded.freeTier.actionLabel": "Подписаться",
+  "dialog.usageExceeded.accountRateLimit.title": "Достигнут лимит Go",
+  "dialog.usageExceeded.accountRateLimit.description":
+    "Достигнут лимит использования. Чтобы продолжить использовать эту модель сейчас, включите использование из доступного баланса",
+  "dialog.usageExceeded.accountRateLimit.actionLabel": "Открыть настройки",
+
   "ui.sessionTurn.status.delegating": "Делегирование работы",
   "ui.sessionTurn.status.delegatingWaitingPermission": "Subagent waiting for permission",
   "ui.sessionTurn.status.delegatingWaitingQuestion": "Subagent waiting for response",
@@ -95,6 +104,18 @@ export const dict = {
   "ui.textField.copied": "Скопировано",
 
   "ui.imagePreview.alt": "Предпросмотр изображения",
+  // kilocode_change start
+  "ui.mermaid.rendering": "Отрисовка диаграммы Mermaid...",
+  "ui.mermaid.renderError": "Не удалось отрисовать Mermaid: {{message}}",
+  "ui.mermaid.errorDefault": "Не удалось отрисовать диаграмму Mermaid.",
+  "ui.mermaid.errorEmpty": "Mermaid отрисовал пустую диаграмму.",
+  "ui.mermaid.download": "Скачать",
+  "ui.mermaid.copySource": "Копировать исходный код Mermaid",
+  "ui.mermaid.copySvg": "Копировать SVG",
+  "ui.mermaid.copyPng": "Копировать PNG",
+  "ui.mermaid.downloadSvg": "Скачать SVG",
+  "ui.mermaid.downloadPng": "Скачать PNG",
+  // kilocode_change end
   "ui.scrollView.ariaLabel": "прокручиваемый контент",
 
   "ui.tool.read": "Чтение",
@@ -104,7 +125,6 @@ export const dict = {
   "ui.tool.grep": "Grep",
   "ui.tool.webfetch": "Webfetch",
   "ui.tool.websearch": "Веб-поиск",
-  "ui.tool.codesearch": "Поиск кода",
   "ui.tool.shell": "Оболочка",
   "ui.tool.patch": "Патч",
   "ui.tool.todos": "Задачи",

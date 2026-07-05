@@ -1,95 +1,65 @@
+import { Effect } from "effect"
 import { Server } from "../../server/server"
 import { UI } from "../ui"
-import { cmd } from "./cmd"
+import { effectCmd } from "../effect-cmd"
 import { withNetworkOptions, resolveNetworkOptions } from "../network"
-import { Flag } from "../../flag/flag"
-import { Instance } from "../../project/instance" // kilocode_change
+import { Flag } from "@opencode-ai/core/flag/flag"
+import { InstanceRuntime } from "../../project/instance-runtime" // kilocode_change
 import open from "open"
-import { networkInterfaces } from "os"
 
-function getNetworkIPs() {
-  const nets = networkInterfaces()
-  const results: string[] = []
-
-  for (const name of Object.keys(nets)) {
-    const net = nets[name]
-    if (!net) continue
-
-    for (const netInfo of net) {
-      // Skip internal and non-IPv4 addresses
-      if (netInfo.internal || netInfo.family !== "IPv4") continue
-
-      // Skip Docker bridge networks (typically 172.x.x.x)
-      if (netInfo.address.startsWith("172.")) continue
-
-      results.push(netInfo.address)
-    }
-  }
-
-  return results
-}
-
-export const WebCommand = cmd({
+export const WebCommand = effectCmd({
   command: "web",
   builder: (yargs) => withNetworkOptions(yargs),
-  describe: "start kilo server and open web interface", // kilocode_change
-  handler: async (args) => {
+  describe: "start kilo server and open web interface",
+  // Server loads instances per-request via x-kilo-directory header — no
+  // ambient project InstanceContext needed at startup.
+  instance: false, // kilocode_change
+  handler: Effect.fn("Cli.web")(function* (args) {
     if (!Flag.KILO_SERVER_PASSWORD) {
       UI.println(UI.Style.TEXT_WARNING_BOLD + "!  KILO_SERVER_PASSWORD is not set; server is unsecured.")
     }
-    const opts = await resolveNetworkOptions(args)
-    const server = await Server.listen(opts)
+    const opts = yield* resolveNetworkOptions(args)
+    const server = yield* Effect.promise(() => Server.listen(opts))
     UI.empty()
     UI.println(UI.logo("  "))
     UI.empty()
 
-    if (opts.hostname === "0.0.0.0") {
-      // Show localhost for local access
-      const localhostUrl = `http://localhost:${server.port}`
-      UI.println(UI.Style.TEXT_INFO_BOLD + "  Local access:      ", UI.Style.TEXT_NORMAL, localhostUrl)
+    // kilocode_change start
+    const urls = server.urls
 
-      // Show network IPs for remote access
-      const networkIPs = getNetworkIPs()
-      if (networkIPs.length > 0) {
-        for (const ip of networkIPs) {
-          UI.println(
-            UI.Style.TEXT_INFO_BOLD + "  Network access:    ",
-            UI.Style.TEXT_NORMAL,
-            `http://${ip}:${server.port}`,
-          )
-        }
-      }
-
-      if (opts.mdns) {
-        UI.println(
-          UI.Style.TEXT_INFO_BOLD + "  mDNS:              ",
-          UI.Style.TEXT_NORMAL,
-          `${opts.mdnsDomain}:${server.port}`,
-        )
-      }
-
-      // Open localhost in browser
-      open(localhostUrl.toString()).catch(() => {})
-    } else {
-      const displayUrl = server.url.toString()
-      UI.println(UI.Style.TEXT_INFO_BOLD + "  Web interface:    ", UI.Style.TEXT_NORMAL, displayUrl)
-      open(displayUrl).catch(() => {})
+    UI.println(UI.Style.TEXT_INFO_BOLD + "  Local:   ", UI.Style.TEXT_NORMAL, urls.local)
+    if (urls.network) {
+      UI.println(UI.Style.TEXT_INFO_BOLD + "  Network: ", UI.Style.TEXT_NORMAL, urls.network)
     }
+
+    if (opts.mdns) {
+      UI.println(
+        UI.Style.TEXT_INFO_BOLD + "  mDNS:    ",
+        UI.Style.TEXT_NORMAL,
+        `${opts.mdnsDomain}:${server.port}`,
+      )
+    }
+
+    open(urls.local).catch(() => {})
+    // kilocode_change end
 
     // kilocode_change start - graceful signal shutdown
-    const abort = new AbortController()
-    const shutdown = async () => {
-      try {
-        await Instance.disposeAll()
-        await server.stop(true)
-      } finally {
-        abort.abort()
-      }
-    }
-    process.on("SIGTERM", shutdown)
-    process.on("SIGINT", shutdown)
-    process.on("SIGHUP", shutdown)
-    await new Promise((resolve) => abort.signal.addEventListener("abort", resolve))
+    yield* Effect.promise(
+      () =>
+        new Promise<void>((resolve) => {
+          const shutdown = async () => {
+            try {
+              await InstanceRuntime.disposeAllInstances()
+              await server.stop(true)
+            } finally {
+              resolve()
+            }
+          }
+          process.once("SIGTERM", shutdown)
+          process.once("SIGINT", shutdown)
+          process.once("SIGHUP", shutdown)
+        }),
+    )
     // kilocode_change end
-  },
+  }),
 })

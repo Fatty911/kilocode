@@ -1,6 +1,6 @@
 import { Deferred, Effect } from "effect"
-import { InstanceState } from "@/effect"
-import { Log } from "@/util"
+import { InstanceState } from "@/effect/instance-state"
+import * as Log from "@opencode-ai/core/util/log"
 import { SessionID } from "@/session/schema"
 import { KiloSessionPromptQueue } from "@/kilocode/session/prompt-queue"
 
@@ -47,6 +47,17 @@ export namespace KiloQuestion {
           yield* Deferred.fail(entry.deferred, args.makeError())
         }
       })
+
+  /** Publishes the terminal event when a pending question effect is interrupted. */
+  export const finalize = <ID, Value>(input: {
+    pending: Map<ID, Value>
+    id: ID
+    publishRejected: () => Effect.Effect<void>
+  }) =>
+    Effect.gen(function* () {
+      if (!input.pending.delete(input.id)) return
+      yield* input.publishRejected()
+    })
 
   /**
    * Auto-dismiss when a newer prompt is already queued on this session — a

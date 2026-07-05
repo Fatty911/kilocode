@@ -52,6 +52,15 @@ export const dict = {
   "ui.sessionTurn.error.freeUsageExceeded": "تم تجاوز حد الاستخدام المجاني",
   "ui.sessionTurn.error.addCredits": "إضافة رصيد",
 
+  "dialog.usageExceeded.freeTier.title": "تم الوصول إلى الحد المجاني",
+  "dialog.usageExceeded.freeTier.description":
+    "اشترك في Kilo Go للحصول على وصول موثوق إلى أفضل النماذج مفتوحة المصدر، ابتداءً من $5/شهر.",
+  "dialog.usageExceeded.freeTier.actionLabel": "اشترك",
+  "dialog.usageExceeded.accountRateLimit.title": "تم الوصول إلى حد Go",
+  "dialog.usageExceeded.accountRateLimit.description":
+    "تم الوصول إلى حد الاستخدام. لمتابعة استخدام هذا النموذج الآن، قم بتفعيل الاستخدام من رصيدك المتاح",
+  "dialog.usageExceeded.accountRateLimit.actionLabel": "فتح الإعدادات",
+
   "ui.sessionTurn.status.delegating": "تفويض العمل",
   "ui.sessionTurn.status.delegatingWaitingPermission": "Subagent waiting for permission",
   "ui.sessionTurn.status.delegatingWaitingQuestion": "Subagent waiting for response",
@@ -96,6 +105,18 @@ export const dict = {
   "ui.textField.copied": "تم النسخ",
 
   "ui.imagePreview.alt": "معاينة الصورة",
+  // kilocode_change start
+  "ui.mermaid.rendering": "جارٍ عرض مخطط Mermaid...",
+  "ui.mermaid.renderError": "فشل عرض Mermaid: {{message}}",
+  "ui.mermaid.errorDefault": "تعذر عرض مخطط Mermaid.",
+  "ui.mermaid.errorEmpty": "عرض Mermaid مخططًا فارغًا.",
+  "ui.mermaid.download": "تنزيل",
+  "ui.mermaid.copySource": "نسخ مصدر Mermaid",
+  "ui.mermaid.copySvg": "نسخ SVG",
+  "ui.mermaid.copyPng": "نسخ PNG",
+  "ui.mermaid.downloadSvg": "تنزيل SVG",
+  "ui.mermaid.downloadPng": "تنزيل PNG",
+  // kilocode_change end
   "ui.scrollView.ariaLabel": "محتوى قابل للتمرير",
 
   "ui.tool.read": "قراءة",
@@ -105,7 +126,6 @@ export const dict = {
   "ui.tool.grep": "Grep",
   "ui.tool.webfetch": "جلب الويب",
   "ui.tool.websearch": "بحث الويب",
-  "ui.tool.codesearch": "بحث الكود",
   "ui.tool.shell": "Shell",
   "ui.tool.patch": "تصحيح",
   "ui.tool.todos": "المهام",

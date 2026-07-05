@@ -53,6 +53,15 @@ export const dict = {
   "ui.sessionTurn.error.freeUsageExceeded": "เกินขีดจำกัดการใช้งานฟรี",
   "ui.sessionTurn.error.addCredits": "เพิ่มเครดิต",
 
+  "dialog.usageExceeded.freeTier.title": "ถึงขีดจำกัดฟรีแล้ว",
+  "dialog.usageExceeded.freeTier.description":
+    "สมัครสมาชิก Kilo Go เพื่อการเข้าถึงโมเดลโอเพนซอร์สที่ดีที่สุดอย่างเชื่อถือได้ เริ่มต้นที่ $5/เดือน",
+  "dialog.usageExceeded.freeTier.actionLabel": "สมัครสมาชิก",
+  "dialog.usageExceeded.accountRateLimit.title": "ถึงขีดจำกัดของ Go แล้ว",
+  "dialog.usageExceeded.accountRateLimit.description":
+    "ถึงขีดจำกัดการใช้งานแล้ว หากต้องการใช้โมเดลนี้ต่อในตอนนี้ ให้เปิดใช้งานจากยอดคงเหลือที่มี",
+  "dialog.usageExceeded.accountRateLimit.actionLabel": "เปิดการตั้งค่า",
+
   "ui.sessionTurn.status.delegating": "มอบหมายงาน",
   "ui.sessionTurn.status.delegatingWaitingPermission": "Subagent waiting for permission",
   "ui.sessionTurn.status.delegatingWaitingQuestion": "Subagent waiting for response",
@@ -97,6 +106,18 @@ export const dict = {
   "ui.textField.copied": "คัดลอกแล้ว",
 
   "ui.imagePreview.alt": "ตัวอย่างรูปภาพ",
+  // kilocode_change start
+  "ui.mermaid.rendering": "กำลังเรนเดอร์ไดอะแกรม Mermaid...",
+  "ui.mermaid.renderError": "เรนเดอร์ Mermaid ไม่สำเร็จ: {{message}}",
+  "ui.mermaid.errorDefault": "ไม่สามารถเรนเดอร์ไดอะแกรม Mermaid ได้",
+  "ui.mermaid.errorEmpty": "Mermaid เรนเดอร์ไดอะแกรมว่าง",
+  "ui.mermaid.download": "ดาวน์โหลด",
+  "ui.mermaid.copySource": "คัดลอกซอร์ส Mermaid",
+  "ui.mermaid.copySvg": "คัดลอก SVG",
+  "ui.mermaid.copyPng": "คัดลอก PNG",
+  "ui.mermaid.downloadSvg": "ดาวน์โหลด SVG",
+  "ui.mermaid.downloadPng": "ดาวน์โหลด PNG",
+  // kilocode_change end
   "ui.scrollView.ariaLabel": "เนื้อหาที่เลื่อนได้",
 
   "ui.tool.read": "อ่าน",
@@ -106,7 +127,6 @@ export const dict = {
   "ui.tool.grep": "Grep",
   "ui.tool.webfetch": "ดึงจากเว็บ",
   "ui.tool.websearch": "ค้นหาเว็บ",
-  "ui.tool.codesearch": "ค้นหาโค้ด",
   "ui.tool.shell": "เชลล์",
   "ui.tool.patch": "แพตช์",
   "ui.tool.todos": "รายการงาน",

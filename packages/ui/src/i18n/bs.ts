@@ -56,6 +56,15 @@ export const dict = {
   "ui.sessionTurn.error.freeUsageExceeded": "Besplatna upotreba premašena",
   "ui.sessionTurn.error.addCredits": "Dodaj kredite",
 
+  "dialog.usageExceeded.freeTier.title": "Dostignut besplatan limit",
+  "dialog.usageExceeded.freeTier.description":
+    "Pretplatite se na Kilo Go za pouzdan pristup najboljim open-source modelima, počevši od $5/mjesec.",
+  "dialog.usageExceeded.freeTier.actionLabel": "Pretplati se",
+  "dialog.usageExceeded.accountRateLimit.title": "Dostignut Go limit",
+  "dialog.usageExceeded.accountRateLimit.description":
+    "Dostignut je limit korištenja. Da nastavite koristiti ovaj model sada, omogućite korištenje iz vašeg dostupnog stanja",
+  "dialog.usageExceeded.accountRateLimit.actionLabel": "Otvori postavke",
+
   "ui.sessionTurn.status.delegating": "Delegiranje posla",
   "ui.sessionTurn.status.delegatingWaitingPermission": "Subagent waiting for permission",
   "ui.sessionTurn.status.delegatingWaitingQuestion": "Subagent waiting for response",
@@ -100,6 +109,18 @@ export const dict = {
   "ui.textField.copied": "Kopirano",
 
   "ui.imagePreview.alt": "Pregled slike",
+  // kilocode_change start
+  "ui.mermaid.rendering": "Renderovanje Mermaid dijagrama...",
+  "ui.mermaid.renderError": "Renderovanje Mermaid dijagrama nije uspjelo: {{message}}",
+  "ui.mermaid.errorDefault": "Nije moguće renderovati Mermaid dijagram.",
+  "ui.mermaid.errorEmpty": "Mermaid je renderovao prazan dijagram.",
+  "ui.mermaid.download": "Preuzmi",
+  "ui.mermaid.copySource": "Kopiraj Mermaid izvor",
+  "ui.mermaid.copySvg": "Kopiraj SVG",
+  "ui.mermaid.copyPng": "Kopiraj PNG",
+  "ui.mermaid.downloadSvg": "Preuzmi SVG",
+  "ui.mermaid.downloadPng": "Preuzmi PNG",
+  // kilocode_change end
   "ui.scrollView.ariaLabel": "sadržaj za pomjeranje",
 
   "ui.tool.read": "Čitanje",
@@ -109,7 +130,6 @@ export const dict = {
   "ui.tool.grep": "Grep",
   "ui.tool.webfetch": "Web preuzimanje",
   "ui.tool.websearch": "Pretraga weba",
-  "ui.tool.codesearch": "Pretraga koda",
   "ui.tool.shell": "Shell",
   "ui.tool.patch": "Patch",
   "ui.tool.todos": "Lista zadataka",

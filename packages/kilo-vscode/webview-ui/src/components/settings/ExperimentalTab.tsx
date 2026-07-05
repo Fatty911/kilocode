@@ -21,7 +21,7 @@ const SHARE_OPTIONS: ShareOption[] = [
 ]
 
 const ExperimentalTab: Component = () => {
-  const { config, updateConfig } = useConfig()
+  const { config, features, updateConfig } = useConfig()
   const language = useLanguage()
   const vscode = useVSCode()
   const [active, setActive] = createSignal(false)
@@ -129,19 +129,6 @@ const ExperimentalTab: Component = () => {
         </SettingsRow>
 
         <SettingsRow
-          title={language.t("settings.experimental.pasteSummary.title")}
-          description={language.t("settings.experimental.pasteSummary.description")}
-        >
-          <Switch
-            checked={experimental().disable_paste_summary ?? false}
-            onChange={(checked) => updateExperimental("disable_paste_summary", checked)}
-            hideLabel
-          >
-            {language.t("settings.experimental.pasteSummary.title")}
-          </Switch>
-        </SettingsRow>
-
-        <SettingsRow
           title={language.t("settings.experimental.batch.title")}
           description={language.t("settings.experimental.batch.description")}
         >
@@ -151,19 +138,6 @@ const ExperimentalTab: Component = () => {
             hideLabel
           >
             {language.t("settings.experimental.batch.title")}
-          </Switch>
-        </SettingsRow>
-
-        <SettingsRow
-          title={language.t("settings.experimental.semanticIndexing.title")}
-          description={language.t("settings.experimental.semanticIndexing.description")}
-        >
-          <Switch
-            checked={experimental().semantic_indexing ?? false}
-            onChange={(checked) => updateExperimental("semantic_indexing", checked)}
-            hideLabel
-          >
-            {language.t("settings.experimental.semanticIndexing.title")}
           </Switch>
         </SettingsRow>
 
@@ -181,15 +155,15 @@ const ExperimentalTab: Component = () => {
         </SettingsRow>
 
         <SettingsRow
-          title={language.t("settings.experimental.agentManagerTool.title")}
-          description={language.t("settings.experimental.agentManagerTool.description")}
+          title={language.t("settings.experimental.nativeNotebookTools.title")}
+          description={language.t("settings.experimental.nativeNotebookTools.description")}
         >
           <Switch
-            checked={experimental().agent_manager_tool ?? false}
-            onChange={(checked) => updateExperimental("agent_manager_tool", checked)}
+            checked={experimental().native_notebook_tools ?? false}
+            onChange={(checked) => updateExperimental("native_notebook_tools", checked)}
             hideLabel
           >
-            {language.t("settings.experimental.agentManagerTool.title")}
+            {language.t("settings.experimental.nativeNotebookTools.title")}
           </Switch>
         </SettingsRow>
 
@@ -210,7 +184,7 @@ const ExperimentalTab: Component = () => {
         <SettingsRow
           title={language.t("settings.experimental.mcpTimeout.title")}
           description={language.t("settings.experimental.mcpTimeout.description")}
-          last
+          last={!features().sandboxControls}
         >
           <TextField
             value={String(experimental().mcp_timeout ?? 60000)}
@@ -222,6 +196,22 @@ const ExperimentalTab: Component = () => {
             }}
           />
         </SettingsRow>
+
+        <Show when={features().sandboxControls}>
+          <SettingsRow
+            title={language.t("settings.experimental.sandbox.title")}
+            description={language.t("settings.experimental.sandbox.description")}
+            last
+          >
+            <Switch
+              checked={experimental().sandbox ?? false}
+              onChange={(checked) => updateExperimental("sandbox", checked)}
+              hideLabel
+            >
+              {language.t("settings.experimental.sandbox.title")}
+            </Switch>
+          </SettingsRow>
+        </Show>
       </Card>
 
       {/* Tool toggles */}

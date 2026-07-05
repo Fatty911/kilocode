@@ -52,6 +52,15 @@ export const dict = {
   "ui.sessionTurn.error.freeUsageExceeded": "Limite d'utilisation gratuite dépassée",
   "ui.sessionTurn.error.addCredits": "Ajouter des crédits",
 
+  "dialog.usageExceeded.freeTier.title": "Limite gratuite atteinte",
+  "dialog.usageExceeded.freeTier.description":
+    "Abonnez-vous à Kilo Go pour un accès fiable aux meilleurs modèles open source, à partir de $5/mois.",
+  "dialog.usageExceeded.freeTier.actionLabel": "S'abonner",
+  "dialog.usageExceeded.accountRateLimit.title": "Limite Go atteinte",
+  "dialog.usageExceeded.accountRateLimit.description":
+    "Limite d'utilisation atteinte. Pour continuer à utiliser ce modèle maintenant, activez l'utilisation depuis votre solde disponible",
+  "dialog.usageExceeded.accountRateLimit.actionLabel": "Ouvrir les paramètres",
+
   "ui.sessionTurn.status.delegating": "Délégation du travail",
   "ui.sessionTurn.status.delegatingWaitingPermission": "Subagent waiting for permission",
   "ui.sessionTurn.status.delegatingWaitingQuestion": "Subagent waiting for response",
@@ -96,6 +105,18 @@ export const dict = {
   "ui.textField.copied": "Copié",
 
   "ui.imagePreview.alt": "Aperçu de l'image",
+  // kilocode_change start
+  "ui.mermaid.rendering": "Rendu du diagramme Mermaid...",
+  "ui.mermaid.renderError": "Échec du rendu Mermaid : {{message}}",
+  "ui.mermaid.errorDefault": "Impossible de rendre le diagramme Mermaid.",
+  "ui.mermaid.errorEmpty": "Mermaid a rendu un diagramme vide.",
+  "ui.mermaid.download": "Télécharger",
+  "ui.mermaid.copySource": "Copier la source Mermaid",
+  "ui.mermaid.copySvg": "Copier le SVG",
+  "ui.mermaid.copyPng": "Copier le PNG",
+  "ui.mermaid.downloadSvg": "Télécharger le SVG",
+  "ui.mermaid.downloadPng": "Télécharger le PNG",
+  // kilocode_change end
   "ui.scrollView.ariaLabel": "contenu défilable",
 
   "ui.tool.read": "Lire",
@@ -105,7 +126,6 @@ export const dict = {
   "ui.tool.grep": "Grep",
   "ui.tool.webfetch": "Webfetch",
   "ui.tool.websearch": "Recherche Web",
-  "ui.tool.codesearch": "Recherche de code",
   "ui.tool.shell": "Shell",
   "ui.tool.patch": "Patch",
   "ui.tool.todos": "Tâches",
