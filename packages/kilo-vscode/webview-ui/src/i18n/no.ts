@@ -957,6 +957,7 @@ export const dict = {
   "provider.custom.models.name.label": "Navn",
   "provider.custom.models.name.placeholder": "Visningsnavn",
   "provider.custom.models.reasoning.label": "Resonnering",
+  "provider.custom.models.modalities.image": "Bilde",
   "provider.custom.models.variants.label": "Varianter",
   "provider.custom.models.variants.add": "Legg til variant",
   "provider.custom.models.variants.remove": "Fjern variant",
@@ -1387,6 +1388,12 @@ export const dict = {
   "settings.experimental.batch.description": "Aktiver batchbehandling av verktøykall",
   "settings.experimental.codebaseSearch.title": "Kodesøk",
   "settings.experimental.codebaseSearch.description": "Aktiver AI-drevet naturlig språksøk på tvers av kodebasen",
+  "settings.experimental.imageGeneration.title": "Bildegenerering",
+  "settings.experimental.imageGeneration.description": "Aktiver AI-bildegenerering",
+  "settings.experimental.imageGenerationModel.title": "Bildemodell",
+  "settings.experimental.imageGenerationModel.description": "Bildegenereringsmodell",
+  "settings.experimental.imageGenerationModel.placeholder": "Standard (Auto Router)",
+
   "settings.experimental.speechToText.title": "Tale til tekst",
   "settings.experimental.speechToText.description":
     "Aktiver taleinndata i prompt-felt ved å bruke din Kilo-konto gjennom Kilo Gateway.",
@@ -1407,6 +1414,12 @@ export const dict = {
   "settings.sandboxing.writablePaths.title": "Ytterligere skrivbare baner",
   "settings.sandboxing.writablePaths.description":
     "Ytterligere filsystembaner som sandkassen tillater skriving til (f.eks. /tmp, /var/log). Disse flettes med de standardskrivbare banene når sandkassen er aktiv.",
+  "settings.experimental.swePruner.title": "SWE-Pruner",
+  "settings.experimental.swePruner.description":
+    "Aktiver SWE-Pruner: oppgavebevisst beskjæring av store lese- og søkeresultater, styrt av et fokusspørsmål fra agenten",
+  "settings.experimental.swePrunerModel.title": "SWE-Pruner-modell",
+  "settings.experimental.swePrunerModel.description":
+    "Modell som brukes til å beskjære verktøyutdata; som standard den konfigurerte lille modellen",
   "settings.experimental.mcpTimeout.title": "MCP-tidsavbrudd (ms)",
   "settings.experimental.mcpTimeout.description": "Tidsavbrudd for MCP-serverforespørsler i millisekunder",
   "settings.experimental.remote.title": "Remote-kontroll",

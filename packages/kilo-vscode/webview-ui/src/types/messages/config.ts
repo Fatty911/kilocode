@@ -40,6 +40,8 @@ export interface WatcherConfig {
 export interface ExperimentalConfig {
   batch_tool?: boolean
   codebase_search?: boolean
+  image_generation?: boolean
+  image_generation_model?: string
   agent_requirements?: boolean
   native_notebook_tools?: boolean
   speech_to_text_model?: string
@@ -49,6 +51,8 @@ export interface ExperimentalConfig {
   sandbox?: boolean
   sandbox_restrict_network?: boolean
   sandbox_writable_paths?: string[]
+  swe_pruner?: boolean
+  swe_pruner_model?: string
 }
 
 export interface CommitMessageConfig {

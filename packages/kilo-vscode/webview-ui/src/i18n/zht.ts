@@ -928,6 +928,7 @@ export const dict = {
   "provider.custom.models.name.label": "名稱",
   "provider.custom.models.name.placeholder": "顯示名稱",
   "provider.custom.models.reasoning.label": "推理",
+  "provider.custom.models.modalities.image": "圖片",
   "provider.custom.models.variants.label": "變體",
   "provider.custom.models.variants.add": "新增變體",
   "provider.custom.models.variants.remove": "移除變體",
@@ -1347,6 +1348,12 @@ export const dict = {
   "settings.experimental.batch.description": "啟用多個工具呼叫的批次處理",
   "settings.experimental.codebaseSearch.title": "程式碼庫搜尋",
   "settings.experimental.codebaseSearch.description": "啟用 AI 驅動的自然語言程式碼庫搜尋",
+  "settings.experimental.imageGeneration.title": "圖像生成",
+  "settings.experimental.imageGeneration.description": "啟用 AI 圖像生成",
+  "settings.experimental.imageGenerationModel.title": "圖像模型",
+  "settings.experimental.imageGenerationModel.description": "圖像生成模型",
+  "settings.experimental.imageGenerationModel.placeholder": "預設 (Auto Router)",
+
   "settings.experimental.speechToText.title": "語音轉文字",
   "settings.experimental.speechToText.description": "透過 Kilo Gateway 使用您的 Kilo 帳戶在提示詞欄位中啟用語音輸入。",
   "settings.models.speechToText.disabledDescription":
@@ -1365,6 +1372,11 @@ export const dict = {
   "settings.sandboxing.writablePaths.title": "額外可寫路徑",
   "settings.sandboxing.writablePaths.description":
     "沙盒允許寫入的額外檔案系統路徑（例如 /tmp、/var/log）。沙盒啟用後，這些路徑會與預設可寫路徑合併。",
+  "settings.experimental.swePruner.title": "SWE-Pruner",
+  "settings.experimental.swePruner.description":
+    "啟用 SWE-Pruner:根據智能體提供的聚焦問題,對大型讀取與搜尋工具輸出進行任務感知裁剪",
+  "settings.experimental.swePrunerModel.title": "SWE-Pruner 模型",
+  "settings.experimental.swePrunerModel.description": "用於裁剪工具輸出的模型;預設為已設定的小模型",
   "settings.experimental.mcpTimeout.title": "MCP 逾時（毫秒）",
   "settings.experimental.mcpTimeout.description": "MCP 伺服器請求的逾時時間（毫秒）",
   "settings.experimental.remote.title": "Remote 控制",

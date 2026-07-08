@@ -996,6 +996,7 @@ export const dict = {
   "provider.custom.models.name.label": "Название",
   "provider.custom.models.name.placeholder": "Отображаемое имя",
   "provider.custom.models.reasoning.label": "Рассуждение",
+  "provider.custom.models.modalities.image": "Изображение",
   "provider.custom.models.variants.label": "Варианты",
   "provider.custom.models.variants.add": "Добавить вариант",
   "provider.custom.models.variants.remove": "Удалить вариант",
@@ -1428,6 +1429,12 @@ export const dict = {
   "settings.experimental.batch.description": "Включить пакетную обработку вызовов инструментов",
   "settings.experimental.codebaseSearch.title": "Поиск по коду",
   "settings.experimental.codebaseSearch.description": "Включить поиск на естественном языке с ИИ по всей кодовой базе",
+  "settings.experimental.imageGeneration.title": "Генерация изображений",
+  "settings.experimental.imageGeneration.description": "Включить генерацию изображений с помощью ИИ",
+  "settings.experimental.imageGenerationModel.title": "Модель изображений",
+  "settings.experimental.imageGenerationModel.description": "Модель генерации изображений",
+  "settings.experimental.imageGenerationModel.placeholder": "По умолчанию (Auto Router)",
+
   "settings.experimental.speechToText.title": "Речь в текст",
   "settings.experimental.speechToText.description":
     "Включите голосовой ввод в полях запросов, используя вашу учетную запись Kilo через Kilo Gateway.",
@@ -1448,6 +1455,12 @@ export const dict = {
   "settings.sandboxing.writablePaths.title": "Дополнительные пути для записи",
   "settings.sandboxing.writablePaths.description":
     "Дополнительные пути файловой системы, в которые разрешена запись в песочнице (например, /tmp, /var/log). Они объединяются с путями записи по умолчанию при активной песочнице.",
+  "settings.experimental.swePruner.title": "SWE-Pruner",
+  "settings.experimental.swePruner.description":
+    "Включить SWE-Pruner: обрезка больших выводов инструментов чтения и поиска на основе фокус-вопроса агента",
+  "settings.experimental.swePrunerModel.title": "Модель SWE-Pruner",
+  "settings.experimental.swePrunerModel.description":
+    "Модель для обрезки вывода инструментов; по умолчанию — настроенная малая модель",
   "settings.experimental.mcpTimeout.title": "Таймаут MCP (мс)",
   "settings.experimental.mcpTimeout.description": "Таймаут запросов MCP-сервера в миллисекундах",
   "settings.experimental.remote.title": "Управление Remote",

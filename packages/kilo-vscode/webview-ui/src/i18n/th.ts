@@ -982,6 +982,7 @@ export const dict = {
   "provider.custom.models.name.label": "ชื่อ",
   "provider.custom.models.name.placeholder": "ชื่อที่แสดง",
   "provider.custom.models.reasoning.label": "การใช้เหตุผล",
+  "provider.custom.models.modalities.image": "รูปภาพ",
   "provider.custom.models.variants.label": "รูปแบบ",
   "provider.custom.models.variants.add": "เพิ่มรูปแบบ",
   "provider.custom.models.variants.remove": "ลบรูปแบบ",
@@ -1407,6 +1408,12 @@ export const dict = {
   "settings.experimental.batch.description": "เปิดใช้งานการประมวลผลแบทช์ของการเรียกเครื่องมือ",
   "settings.experimental.codebaseSearch.title": "ค้นหาโค้ดเบส",
   "settings.experimental.codebaseSearch.description": "เปิดใช้งานการค้นหาด้วยภาษาธรรมชาติโดย AI ทั่วทั้งโค้ดเบส",
+  "settings.experimental.imageGeneration.title": "การสร้างภาพ",
+  "settings.experimental.imageGeneration.description": "เปิดใช้งานการสร้างภาพด้วย AI",
+  "settings.experimental.imageGenerationModel.title": "โมเดลภาพ",
+  "settings.experimental.imageGenerationModel.description": "โมเดลการสร้างภาพ",
+  "settings.experimental.imageGenerationModel.placeholder": "ค่าเริ่มต้น (Auto Router)",
+
   "settings.experimental.speechToText.title": "แปลงเสียงเป็นข้อความ",
   "settings.experimental.speechToText.description":
     "เปิดใช้งานการป้อนข้อมูลด้วยเสียงในช่องพรอมต์โดยใช้บัญชี Kilo ของคุณผ่าน Kilo Gateway",
@@ -1427,6 +1434,12 @@ export const dict = {
   "settings.sandboxing.writablePaths.title": "เส้นทางที่เขียนได้เพิ่มเติม",
   "settings.sandboxing.writablePaths.description":
     "เส้นทางระบบไฟล์เพิ่มเติมที่แซนด์บ็อกซ์อนุญาตให้เขียนได้ (เช่น /tmp, /var/log) จะถูกรวมเข้ากับเส้นทางที่เขียนได้เริ่มต้นเมื่อแซนด์บ็อกซ์เปิดใช้งาน",
+  "settings.experimental.swePruner.title": "SWE-Pruner",
+  "settings.experimental.swePruner.description":
+    "เปิดใช้ SWE-Pruner: ตัดทอนผลลัพธ์ขนาดใหญ่ของเครื่องมืออ่านและค้นหาตามคำถามโฟกัสจากเอเจนต์",
+  "settings.experimental.swePrunerModel.title": "โมเดล SWE-Pruner",
+  "settings.experimental.swePrunerModel.description":
+    "โมเดลที่ใช้ตัดทอนผลลัพธ์ของเครื่องมือ ค่าเริ่มต้นคือโมเดลขนาดเล็กที่กำหนดไว้",
   "settings.experimental.mcpTimeout.title": "หมดเวลา MCP (มิลลิวินาที)",
   "settings.experimental.mcpTimeout.description": "หมดเวลาสำหรับคำขอเซิร์ฟเวอร์ MCP เป็นมิลลิวินาที",
   "settings.experimental.remote.title": "การควบคุม Remote",

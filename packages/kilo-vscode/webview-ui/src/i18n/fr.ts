@@ -1008,6 +1008,7 @@ export const dict = {
   "provider.custom.models.name.label": "Nom",
   "provider.custom.models.name.placeholder": "Nom d'affichage",
   "provider.custom.models.reasoning.label": "Raisonnement",
+  "provider.custom.models.modalities.image": "Image",
   "provider.custom.models.variants.label": "Variantes",
   "provider.custom.models.variants.add": "Ajouter une variante",
   "provider.custom.models.variants.remove": "Supprimer la variante",
@@ -1456,6 +1457,12 @@ export const dict = {
   "settings.experimental.codebaseSearch.title": "Recherche de code",
   "settings.experimental.codebaseSearch.description":
     "Activer la recherche en langage naturel par IA dans toute la base de code",
+  "settings.experimental.imageGeneration.title": "Génération d'images",
+  "settings.experimental.imageGeneration.description": "Activer la génération d'images par IA",
+  "settings.experimental.imageGenerationModel.title": "Modèle d'image",
+  "settings.experimental.imageGenerationModel.description": "Modèle de génération d'images",
+  "settings.experimental.imageGenerationModel.placeholder": "Par défaut (Auto Router)",
+
   "settings.experimental.speechToText.title": "Transcription vocale",
   "settings.experimental.speechToText.description":
     "Activez la saisie vocale dans les champs de prompt en utilisant votre compte Kilo via Kilo Gateway.",
@@ -1478,6 +1485,12 @@ export const dict = {
   "settings.sandboxing.writablePaths.title": "Chemins en écriture supplémentaires",
   "settings.sandboxing.writablePaths.description":
     "Chemins système supplémentaires autorisés en écriture par le bac à sable (par ex. /tmp, /var/log). Ils sont fusionnés avec les chemins en écriture par défaut lorsque le bac à sable est actif.",
+  "settings.experimental.swePruner.title": "SWE-Pruner",
+  "settings.experimental.swePruner.description":
+    "Activer SWE-Pruner : élagage des sorties volumineuses des outils de lecture et de recherche, guidé par une question de focus fournie par l'agent",
+  "settings.experimental.swePrunerModel.title": "Modèle SWE-Pruner",
+  "settings.experimental.swePrunerModel.description":
+    "Modèle utilisé pour élaguer les sorties d'outils ; par défaut, le small model configuré",
   "settings.experimental.mcpTimeout.title": "Délai MCP (ms)",
   "settings.experimental.mcpTimeout.description": "Délai des requêtes du serveur MCP en millisecondes",
   "settings.experimental.remote.title": "Contrôle Remote",

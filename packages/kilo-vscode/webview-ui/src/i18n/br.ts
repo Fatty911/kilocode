@@ -956,6 +956,7 @@ export const dict = {
   "provider.custom.models.name.label": "Nome",
   "provider.custom.models.name.placeholder": "Nome de Exibição",
   "provider.custom.models.reasoning.label": "Raciocínio",
+  "provider.custom.models.modalities.image": "Imagem",
   "provider.custom.models.variants.label": "Variantes",
   "provider.custom.models.variants.add": "Adicionar variante",
   "provider.custom.models.variants.remove": "Remover variante",
@@ -1433,6 +1434,12 @@ export const dict = {
   "settings.experimental.codebaseSearch.title": "Pesquisa de código",
   "settings.experimental.codebaseSearch.description":
     "Ativar pesquisa por linguagem natural com IA em toda a base de código",
+  "settings.experimental.imageGeneration.title": "Geração de imagens",
+  "settings.experimental.imageGeneration.description": "Ativar geração de imagens por IA",
+  "settings.experimental.imageGenerationModel.title": "Modelo de imagem",
+  "settings.experimental.imageGenerationModel.description": "Modelo de geração de imagens",
+  "settings.experimental.imageGenerationModel.placeholder": "Padrão (Auto Router)",
+
   "settings.experimental.speechToText.title": "Fala para texto",
   "settings.experimental.speechToText.description":
     "Ative a entrada de voz nos campos de prompt usando sua conta do Kilo por meio do Kilo Gateway.",
@@ -1454,6 +1461,12 @@ export const dict = {
   "settings.sandboxing.writablePaths.title": "Caminhos graváveis adicionais",
   "settings.sandboxing.writablePaths.description":
     "Caminhos adicionais do sistema de arquivos onde o sandbox permite gravação (por exemplo, /tmp, /var/log). Eles são mesclados com os caminhos graváveis padrão quando o sandbox está ativo.",
+  "settings.experimental.swePruner.title": "SWE-Pruner",
+  "settings.experimental.swePruner.description":
+    "Ativar SWE-Pruner: poda das saídas grandes das ferramentas de leitura e busca, guiada por uma pergunta de foco do agente",
+  "settings.experimental.swePrunerModel.title": "Modelo do SWE-Pruner",
+  "settings.experimental.swePrunerModel.description":
+    "Modelo usado para podar as saídas das ferramentas; por padrão, o modelo pequeno configurado",
   "settings.experimental.mcpTimeout.title": "Tempo limite MCP (ms)",
   "settings.experimental.mcpTimeout.description": "Tempo limite para solicitações do servidor MCP em milissegundos",
   "settings.experimental.remote.title": "Controle Remote",

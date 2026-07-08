@@ -992,6 +992,7 @@ export const dict = {
   "provider.custom.models.name.label": "Navn",
   "provider.custom.models.name.placeholder": "Visningsnavn",
   "provider.custom.models.reasoning.label": "Ræsonnement",
+  "provider.custom.models.modalities.image": "Billede",
   "provider.custom.models.variants.label": "Varianter",
   "provider.custom.models.variants.add": "Tilføj variant",
   "provider.custom.models.variants.remove": "Fjern variant",
@@ -1424,6 +1425,12 @@ export const dict = {
   "settings.experimental.batch.description": "Aktiver batchbehandling af flere værktøjskald",
   "settings.experimental.codebaseSearch.title": "Kodesøgning",
   "settings.experimental.codebaseSearch.description": "Aktiver AI-drevet naturlig sprogsøgning på tværs af kodebasen",
+  "settings.experimental.imageGeneration.title": "Billedgenerering",
+  "settings.experimental.imageGeneration.description": "Aktiver AI-billedgenerering",
+  "settings.experimental.imageGenerationModel.title": "Billedmodel",
+  "settings.experimental.imageGenerationModel.description": "Billedgenereringsmodel",
+  "settings.experimental.imageGenerationModel.placeholder": "Standard (Auto Router)",
+
   "settings.experimental.speechToText.title": "Tale til tekst",
   "settings.experimental.speechToText.description":
     "Aktivér stemmeinput i prompt-felter ved hjælp af din Kilo-konto gennem Kilo Gateway.",
@@ -1444,6 +1451,12 @@ export const dict = {
   "settings.sandboxing.writablePaths.title": "Yderligere skrivbare stier",
   "settings.sandboxing.writablePaths.description":
     "Yderligere filsystemstier, som sandkassen tillader skrivning til (f.eks. /tmp, /var/log). Disse flettes med de standardskrivbare stier, når sandkassen er aktiv.",
+  "settings.experimental.swePruner.title": "SWE-Pruner",
+  "settings.experimental.swePruner.description":
+    "Aktivér SWE-Pruner: opgavebevidst beskæring af store læse- og søgeoutput, styret af et fokusspørgsmål fra agenten",
+  "settings.experimental.swePrunerModel.title": "SWE-Pruner-model",
+  "settings.experimental.swePrunerModel.description":
+    "Model til beskæring af værktøjsoutput; som standard den konfigurerede lille model",
   "settings.experimental.mcpTimeout.title": "MCP-timeout (ms)",
   "settings.experimental.mcpTimeout.description": "Timeout for MCP-serveranmodninger i millisekunder",
   "settings.experimental.remote.title": "Remote-styring",

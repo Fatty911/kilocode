@@ -947,6 +947,7 @@ export const dict = {
   "provider.custom.models.name.label": "이름",
   "provider.custom.models.name.placeholder": "표시 이름",
   "provider.custom.models.reasoning.label": "추론",
+  "provider.custom.models.modalities.image": "이미지",
   "provider.custom.models.variants.label": "변형",
   "provider.custom.models.variants.add": "변형 추가",
   "provider.custom.models.variants.remove": "변형 제거",
@@ -1411,6 +1412,12 @@ export const dict = {
   "settings.experimental.batch.description": "여러 도구 호출의 배치 처리 활성화",
   "settings.experimental.codebaseSearch.title": "코드베이스 검색",
   "settings.experimental.codebaseSearch.description": "코드베이스 전체에서 AI 기반 자연어 검색 활성화",
+  "settings.experimental.imageGeneration.title": "이미지 생성",
+  "settings.experimental.imageGeneration.description": "AI 이미지 생성 활성화",
+  "settings.experimental.imageGenerationModel.title": "이미지 모델",
+  "settings.experimental.imageGenerationModel.description": "이미지 생성 모델",
+  "settings.experimental.imageGenerationModel.placeholder": "기본값 (Auto Router)",
+
   "settings.experimental.speechToText.title": "음성 텍스트 변환",
   "settings.experimental.speechToText.description":
     "Kilo Gateway를 통해 Kilo 계정을 사용하여 프롬프트 필드에서 음성 입력을 활성화합니다.",
@@ -1431,6 +1438,12 @@ export const dict = {
   "settings.sandboxing.writablePaths.title": "추가 쓰기 가능 경로",
   "settings.sandboxing.writablePaths.description":
     "샌드박스에서 쓰기를 허용하는 추가 파일시스템 경로(예: /tmp, /var/log). 샌드박스가 활성화되면 기본 쓰기 가능 경로와 병합됩니다.",
+  "settings.experimental.swePruner.title": "SWE-Pruner",
+  "settings.experimental.swePruner.description":
+    "SWE-Pruner 활성화: 에이전트의 포커스 질문에 따라 대용량 읽기·검색 도구 출력을 관련 줄만 남기도록 정리합니다",
+  "settings.experimental.swePrunerModel.title": "SWE-Pruner 모델",
+  "settings.experimental.swePrunerModel.description":
+    "도구 출력을 정리하는 데 사용하는 모델. 기본값은 구성된 소형 모델입니다",
   "settings.experimental.mcpTimeout.title": "MCP 타임아웃 (ms)",
   "settings.experimental.mcpTimeout.description": "MCP 서버 요청의 타임아웃 시간 (밀리초)",
   "settings.experimental.remote.title": "Remote 제어",

@@ -767,6 +767,7 @@ export const dict = {
   "provider.custom.models.name.label": "Nome",
   "provider.custom.models.name.placeholder": "Nome visualizzato",
   "provider.custom.models.reasoning.label": "Reasoning",
+  "provider.custom.models.modalities.image": "Immagine",
   "provider.custom.models.variants.label": "Variants",
   "provider.custom.models.variants.add": "Aggiungi variante",
   "provider.custom.models.variants.remove": "Rimuovi variante",
@@ -1222,6 +1223,12 @@ export const dict = {
     "Abilita l'indicizzazione semantica del codebase e il tool semantic_search. Richiede configurazione indicizzazione.",
   "settings.experimental.codebaseSearch.title": "Ricerca codebase",
   "settings.experimental.codebaseSearch.description": "Abilita ricerca in linguaggio naturale con AI nel codebase",
+  "settings.experimental.imageGeneration.title": "Generazione di immagini",
+  "settings.experimental.imageGeneration.description": "Abilita la generazione di immagini con AI",
+  "settings.experimental.imageGenerationModel.title": "Modello di immagine",
+  "settings.experimental.imageGenerationModel.description": "Modello di generazione di immagini",
+  "settings.experimental.imageGenerationModel.placeholder": "Predefinito (Auto Router)",
+
   "settings.experimental.nativeNotebookTools.title": "Strumenti nativi per notebook",
   "settings.experimental.nativeNotebookTools.description":
     "Abilita strumenti sperimentali per leggere, modificare ed eseguire i notebook di VS Code",
@@ -1235,6 +1242,12 @@ export const dict = {
   "settings.sandboxing.writablePaths.title": "Percorsi di scrittura aggiuntivi",
   "settings.sandboxing.writablePaths.description":
     "Percorsi aggiuntivi del file system in cui la sandbox consente la scrittura (es. /tmp, /var/log). Vengono uniti con i percorsi di scrittura predefiniti quando la sandbox è attiva.",
+  "settings.experimental.swePruner.title": "SWE-Pruner",
+  "settings.experimental.swePruner.description":
+    "Abilita SWE-Pruner: potatura delle uscite di grandi dimensioni degli strumenti di lettura e ricerca, guidata da una domanda di focus dell'agente",
+  "settings.experimental.swePrunerModel.title": "Modello SWE-Pruner",
+  "settings.experimental.swePrunerModel.description":
+    "Modello usato per potare le uscite degli strumenti; per impostazione predefinita, il modello piccolo configurato",
   "settings.experimental.mcpTimeout.title": "Timeout MCP (ms)",
   "settings.experimental.mcpTimeout.description": "Timeout per richieste server MCP in millisecondi",
   "settings.experimental.remote.title": "Controllo remoto",
