@@ -820,18 +820,20 @@ export function UserMessageDisplay(props: {
 
   const Delete = () => (
     <Show when={props.onDelete}>
-      <IconButton
-        data-slot="user-message-delete"
-        icon="close-small"
-        size="normal"
-        variant="ghost"
-        onMouseDown={(e) => e.preventDefault()}
-        onClick={(event) => {
-          event.stopPropagation()
-          props.onDelete?.()
-        }}
-        aria-label={i18n.t("ui.message.deleteQueued")}
-      />
+      <Tooltip value={i18n.t("ui.message.deleteQueued")} placement="right" gutter={4}>
+        <IconButton
+          data-slot="user-message-delete"
+          icon="close-small"
+          size="normal"
+          variant="ghost"
+          onMouseDown={(e) => e.preventDefault()}
+          onClick={(event) => {
+            event.stopPropagation()
+            props.onDelete?.()
+          }}
+          aria-label={i18n.t("ui.message.deleteQueued")}
+        />
+      </Tooltip>
     </Show>
   )
 
