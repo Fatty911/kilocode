@@ -70,7 +70,7 @@ describe("terminal", () => {
     expect(terminal({ reason: "completed", messages: [message("other")], todos: [] })?.kind).toBe("unexpected")
   })
 
-  it("includes a gateway generation id for unexpected provider finishes", () => {
+  it("includes both request ids for unexpected provider finishes", () => {
     const parts: Part[] = [
       {
         id: "p1",
@@ -79,11 +79,22 @@ describe("terminal", () => {
         type: "step-finish",
         reason: "other",
         generationID: "gen_test",
+        vercelID: "fra1::other",
       },
     ]
     expect(
-      terminal({ reason: "completed", messages: [message("other")], todos: [], parts: () => parts }),
-    ).toMatchObject({ kind: "unexpected", finish: "other", generationID: "gen_test" })
+      terminal({
+        reason: "completed",
+        messages: [message("other")],
+        todos: [],
+        parts: () => parts,
+      }),
+    ).toMatchObject({
+      kind: "unexpected",
+      finish: "other",
+      vercelID: "fra1::other",
+      generationID: "gen_test",
+    })
   })
 
   it("does not expose generation ids for other terminal outcomes", () => {

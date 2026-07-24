@@ -579,6 +579,7 @@ describe("session processor empty tool-calls", () => {
               usage: usage(),
               providerMetadata: {
                 kilocode: { routedModelID: "openai/gpt-5.5-20260423" },
+                kilo: { vercelID: "fra1::test" },
                 gateway: {
                   generationId: "gen_test",
                   routing: { finalProvider: "openai" },
@@ -640,6 +641,7 @@ describe("session processor empty tool-calls", () => {
             modelID: ModelV2.ID.make("openai/gpt-5.5-20260423"),
           })
           expect(part?.generationID).toBe("gen_test")
+          expect(part?.vercelID).toBe("fra1::test")
           expect(part).not.toHaveProperty("providerMetadata")
           expect(part).not.toHaveProperty("gateway")
         }),

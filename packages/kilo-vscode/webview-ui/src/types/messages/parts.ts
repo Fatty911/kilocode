@@ -99,6 +99,7 @@ export interface StepFinishPart extends BasePart {
     modelID: string
   }
   generationID?: string
+  vercelID?: string
   cost?: number
   tokens?: {
     input: number

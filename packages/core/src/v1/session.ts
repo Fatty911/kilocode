@@ -254,6 +254,7 @@ export const StepFinishPart = Schema.Struct({
     }),
   ),
   generationID: Schema.optional(Schema.String), // kilocode_change
+  vercelID: Schema.optional(Schema.String), // kilocode_change
   metrics: Schema.optional(
     Schema.Struct({
       prompt: Schema.optional(Schema.Finite),

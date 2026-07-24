@@ -870,6 +870,7 @@ export const layer = Layer.effect(
               selected: ctx.assistantMessage.modelID,
             })
             const generationID = KiloSessionProcessor.generationID(value.providerMetadata)
+            const vercelID = KiloResponseMetadata.read(value.providerMetadata)
             // kilocode_change end
             // kilocode_change start - guard against finish-step without start-step:
             // ctx.stepStart is 0 until `start-step` fires, which would feed a
@@ -924,6 +925,7 @@ export const layer = Layer.effect(
               time: { start: startDate, end: endDate, elapsed: elapsedMs }, // kilocode_change
               ...(model ? { model } : {}), // kilocode_change
               ...(generationID ? { generationID } : {}), // kilocode_change
+              ...(vercelID ? { vercelID } : {}), // kilocode_change
               ...(metrics ? { metrics } : {}), // kilocode_change
               tokens: usage.tokens,
               cost: usage.cost,

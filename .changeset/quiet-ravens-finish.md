@@ -4,4 +4,4 @@
 "kilo-code": patch
 ---
 
-Preserve unexpected provider finish reasons and show the Gateway generation ID when a response ends unexpectedly.
+Preserve unexpected provider finish reasons and show the request and Gateway generation IDs when a response ends unexpectedly.
