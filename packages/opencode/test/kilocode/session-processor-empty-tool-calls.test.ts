@@ -575,7 +575,7 @@ describe("session processor empty tool-calls", () => {
             LLMEvent.stepStart({ index: 0 }),
             LLMEvent.stepFinish({
               index: 0,
-              reason: "stop",
+              reason: "other",
               usage: usage(),
               providerMetadata: {
                 kilocode: { routedModelID: "openai/gpt-5.5-20260423" },
@@ -587,7 +587,7 @@ describe("session processor empty tool-calls", () => {
                 },
               },
             }),
-            LLMEvent.finish({ reason: "stop", usage: usage() }),
+            LLMEvent.finish({ reason: "other", usage: usage() }),
           )
 
           const chat = yield* session.create({})
